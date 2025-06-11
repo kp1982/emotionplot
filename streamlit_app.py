@@ -35,7 +35,7 @@ if submitted:
 #    emotion_prediction = prediction_data.get("prediction", "Not available")
 #    st.success(f"Predicted Emotions: {prediction_data}")
 #else:
-    st.error(f"Error: {response.status_code}")
+#    st.error(f"Error: {response.status_code}")
 
 
 
