@@ -21,7 +21,7 @@ if submitted:
     }
 
     st.write("Your input:", input_data)
-api_url = "https://taxifare.lewagon.ai/"
+api_url = ""
 response = requests.post(api_url, json=ride_data)
 
 if response.status_code == 200:
