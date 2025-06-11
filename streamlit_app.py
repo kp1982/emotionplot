@@ -1,5 +1,4 @@
 import streamlit as st
-import tkinter as tk
 
 st.title("Emotionplot")
 st.write(
