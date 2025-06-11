@@ -6,23 +6,21 @@ st.write(
     "Instructions for user."
 )
 
-
 # Create a form for user input
 with st.form("User input"):
-    url = st.text_input("Enter URL" ()")
-    chunks = st.number_input("How many sentences would you like to group for plotting?", format="%.6f")
+    url = st.text_input("Enter URL")
+    chunks = st.number_input("How many sentences would you like to group for plotting?", min_value=1, step=1)
     
     submitted = st.form_submit_button("Submit")
 
 # If form is submitted, create a dictionary with the input data
 if submitted:
     input_data = {
-        "url": date_time,
+        "url": url,  # Fixed variable name
         "chunks": chunks,
     }
 
     st.write("Your input:", input_data)
-
 api_url = "https://taxifare.lewagon.ai/"
 response = requests.post(api_url, json=ride_data)
 
