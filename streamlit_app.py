@@ -1,10 +1,5 @@
 import streamlit as st
 
-st.title("Emotionplot")
-st.write(
-    "Instructions for user."
-)
-
 
 st.title("Emotionplot")
 st.write("Instructions for user.")
