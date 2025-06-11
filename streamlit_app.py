@@ -6,7 +6,6 @@ st.write(
     "Instructions for user."
 )
 
-import streamlit as st
 
 st.title("Emotionplot")
 st.write("Instructions for user.")
@@ -33,17 +32,6 @@ if submitted:
         st.write("Your input:", input_data)
     else:
         st.error("Please provide both a valid URL and a numerical value.")
-
-
-#api_url = ""
-#response = requests.post(api_url, json=ride_data)
-
-#if response.status_code == 200:
-#    prediction_data = response.json()
-#    emotion_prediction = prediction_data.get("prediction", "Not available")
-#    st.success(f"Predicted Emotions: {prediction_data}")
-#else:
-#    st.error(f"Error: {response.status_code}")
 
 
 
