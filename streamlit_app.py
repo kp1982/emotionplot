@@ -1,11 +1,11 @@
 import streamlit as st
+import tkinter as tk
 
 st.title("Emotionplot")
 st.write(
     "Instructions for user."
 )
 
-import tkinter as tk
 
 def submit():
     link = link_entry.get()
@@ -31,3 +31,7 @@ submit_button.pack(pady=10)
 
 # Run the GUI loop
 root.mainloop()
+
+
+
+
