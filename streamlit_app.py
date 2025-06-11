@@ -27,14 +27,14 @@ if submitted:
 
     st.write("Your input:", input_data)
 
-api_url = ""
-response = requests.post(api_url, json=ride_data)
+#api_url = ""
+#response = requests.post(api_url, json=ride_data)
 
-if response.status_code == 200:
-    prediction_data = response.json()
-    emotion_prediction = prediction_data.get("prediction", "Not available")
-    st.success(f"Predicted Emotions: {prediction_data}")
-else:
+#if response.status_code == 200:
+#    prediction_data = response.json()
+#    emotion_prediction = prediction_data.get("prediction", "Not available")
+#    st.success(f"Predicted Emotions: {prediction_data}")
+#else:
     st.error(f"Error: {response.status_code}")
 
 
