@@ -7,31 +7,31 @@ st.write(
 )
 
 
-def submit():
-    link = link_entry.get()
-    number = number_entry.get()
-    print(f"Link: {link}")
-    print(f"Number: {number}")
+# Create a form for user input
+with st.form("User input"):
+    url = st.text_input("Enter URL" ()")
+    chunks = st.number_input("How many sentences would you like to group for plotting?", format="%.6f")
+    
+    submitted = st.form_submit_button("Submit")
 
-# Create the main window
-root = tk.Tk()
-root.title("User Input Interface")
+# If form is submitted, create a dictionary with the input data
+if submitted:
+    input_data = {
+        "url": date_time,
+        "chunks": chunks,
+    }
 
-# Create and place widgets
-tk.Label(root, text="Enter Link:").pack(pady=5)
-link_entry = tk.Entry(root, width=50)
-link_entry.pack(pady=5)
+    st.write("Your input:", input_data)
 
-tk.Label(root, text="Enter Number:").pack(pady=5)
-number_entry = tk.Entry(root, width=50)
-number_entry.pack(pady=5)
+api_url = "https://taxifare.lewagon.ai/"
+response = requests.post(api_url, json=ride_data)
 
-submit_button = tk.Button(root, text="Submit", command=submit)
-submit_button.pack(pady=10)
-
-# Run the GUI loop
-root.mainloop()
-
+if response.status_code == 200:
+    prediction_data = response.json()
+    emotion_prediction = prediction_data.get("prediction", "Not available")
+    st.success(f"Predicted Emotions: {prediction_data}")
+else:
+    st.error(f"Error: {response.status_code}")
 
 
 
