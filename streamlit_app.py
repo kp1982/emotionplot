@@ -149,14 +149,14 @@ elif st.session_state.page == "plot":
             # Try to convert JSON data to DataFrame
             try:
                 if isinstance(data_source, dict):
-                    emotions_df = pd.DataFrame(data_source)
+                    df = pd.DataFrame(data_source)
                 else:  # likely a list of dicts
-                    emotions_df = pd.DataFrame(data_source)
+                    df = pd.DataFrame(data_source)
                 # Try to ensure there is a "chunk" column
                 if "chunk" not in df.columns:
-                    emotions_df["chunk"] = df.index.astype(str)
+                    df["chunk"] = df.index.astype(str)
                 plot_stacked_emotions(
-                    emotions_df,
+                    df,
                     group_size=chunks_interactive,
                     template_selected=template_interactive
                 )
