@@ -1,5 +1,7 @@
 import streamlit as st
 import json
+import plotly.graph_objects as go
+import pandas as pd
 
 
 # Initialize page state
@@ -81,6 +83,68 @@ elif st.session_state.page == "plot":
             key="template_interactive"
         )
 
+    def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
+    """
+    Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
+    """
+    # Select emotions to plot
+    emotions_to_plot = [
+        col for col in emotions_df.columns
+        if col not in ["chunk", "text"] and not (exclude_neutral and col.lower() == "neutral")
+    ]
+
+    # Group emotion scores
+    grouped = emotions_df[emotions_to_plot].groupby(emotions_df.index // group_size).sum()
+    grouped["chunk"] = emotions_df["chunk"].groupby(emotions_df.index // group_size).first()
+
+    # Custom emotion order (adjust to your data)
+    custom_order = [
+        "anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness",
+        "love", "gratitude", "pride", "relief", "amusement", "admiration", "approval",
+        "excitement", "optimism", "caring", "desire", "realization", "confusion",
+        "nervousness", "embarrassment", "annoyance", "disappointment", "remorse",
+        "disgust", "grief", "neutral"
+    ]
+    default_visible = set(["anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"])
+
+    fig = go.Figure()
+    for emotion in custom_order:
+        if emotion in grouped.columns:
+            fig.add_trace(
+                go.Scatter(
+                    x=grouped.index,
+                    y=grouped[emotion],
+                    mode='lines',
+                    name=emotion,
+                    customdata=grouped["chunk"],
+                    hovertemplate=(
+                        "<b>Chunk Index:</b> %{x}<br>" +
+                        "<b>Emotion:</b> %{fullData.name}<br>" +
+                        "<b>Emotion Score:</b> %{y:.2f}<br>" +
+                        "<b>Text:</b> %{customdata}<extra></extra>"
+                    ),
+                    visible=True if emotion in default_visible else "legendonly"
+                )
+            )
+
+    fig.update_layout(
+        title="Stacked Emotion Scores per Chunk",
+        xaxis=dict(
+            title="Chunk Index",
+            rangeslider=dict(visible=True),
+            type="linear"
+        ),
+        yaxis=dict(
+            title="Emotion Score"
+        ),
+        height=600,
+        legend_title="Emotion",
+        dragmode="pan",
+        template=template_selected
+    )
+
+    st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": True})
+        
         st.write(f"Template: `{template_interactive}`, Grouping: {chunks_interactive}")
         st.write("➡️ This is where the interactive Plotly chart would appear.")
 
