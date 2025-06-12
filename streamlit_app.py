@@ -88,6 +88,7 @@ if st.session_state.page == "input":
     if uploaded_file is not None:
         try:
             file_data = json.load(uploaded_file)
+            file_data = load_json_to_dataframe(file_data)
             st.session_state.file_data = file_data
             st.session_state.url = None  # Clear URL if a file is uploaded
             st.success("JSON file uploaded successfully!")
