@@ -8,6 +8,7 @@ if "page" not in st.session_state:
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
+
 # Page 1 – URL Input
 if st.session_state.page == "input":
     st.title("Emotionplot – Step 1")
@@ -24,9 +25,7 @@ if st.session_state.page == "input":
             st.error("Please enter a valid URL.")
 
     st.divider()
-    st.markdown("#### 🎬 While you're waiting, enjoy this short video:")
-    # Embed a funny video (replace the URL if you prefer another one)
-    st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")  # Classic internet surprise
+    st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
 
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
