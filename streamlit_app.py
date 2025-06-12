@@ -1,4 +1,4 @@
-import streamlit as st
+otions_import streamlit as st
 import json
 import plotly.graph_objects as go
 import pandas as pd
@@ -149,14 +149,14 @@ elif st.session_state.page == "plot":
             # Try to convert JSON data to DataFrame
             try:
                 if isinstance(data_source, dict):
-                    df = pd.DataFrame(data_source)
+                    emotions_df = pd.DataFrame(data_source)
                 else:  # likely a list of dicts
-                    df = pd.DataFrame(data_source)
+                    emotions_df = pd.DataFrame(data_source)
                 # Try to ensure there is a "chunk" column
                 if "chunk" not in df.columns:
-                    df["chunk"] = df.index.astype(str)
+                    emotions_df["chunk"] = df.index.astype(str)
                 plot_stacked_emotions(
-                    df,
+                    emotions_df,
                     group_size=chunks_interactive,
                     template_selected=template_interactive
                 )
