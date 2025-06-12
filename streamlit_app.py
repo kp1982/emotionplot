@@ -1,31 +1,38 @@
-import re
-import json
 import streamlit as st
+import pandas as pd
+import json
 
-# Initialisierung des Seitenzustands
+# Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "input"
 
-# Optionen für Templates und Plot-Typen
+# Templates und Plottypen
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
-# Seite 1 – JSON Upload
-uploaded_file = st.file_uploader("Upload JSON file", type=["json", "txt"])
-if uploaded_file:
-    content = uploaded_file.read().decode("utf-8")
-    # Versuche einfache Keys mit Anführungszeichen zu versehen
-    fixed_content = re.sub(r'(\w+):', r'"\1":', content)
-    try:
-        data = json.loads(fixed_content)
-        st.write(data)
-    except Exception as e:
-        st.error(f"Fehler beim Parsen nach Fix: {e}")
+# Page 1 – JSON-Upload statt URL
+if st.session_state.page == "input":
+    st.title("Emotionplot – Schritt 1")
+    st.write("📂 Lade deine JSON-Datei hoch:")
 
-    #st.divider()
-    #st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
-    
-    # Display a funny looping GIF
+    uploaded_file = st.file_uploader("Wähle eine JSON-Datei", type="json")
+
+    if st.button("Weiter"):
+        if uploaded_file:
+            # JSON-Daten einlesen
+            raw_data = json.load(uploaded_file)
+
+            # Optional: Fehlerbehandlung falls Schlüssel fehlt
+            if "emotions" in raw_data:
+                st.session_state.data = pd.DataFrame(raw_data["emotions"])
+                st.session_state.page = "plot"
+                st.experimental_rerun()
+            else:
+                st.error("Die JSON-Datei enthält keinen 'emotions'-Schlüssel.")
+        else:
+            st.error("Bitte lade eine gültige JSON-Datei hoch.")
+
+    # Optional: GIF anzeigen
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
 
 
