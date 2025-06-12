@@ -30,7 +30,7 @@ if st.session_state.page == "input":
         if url:
             st.session_state.url = url
             st.session_state.page = "plot"
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Please enter a valid URL.")
 
@@ -113,4 +113,4 @@ elif st.session_state.page == "plot":
         st.experimental_rerun()
     if st.button("Back"):
         st.session_state.page = "input"
-        st.experimental_rerun()
+        st.rerun()
