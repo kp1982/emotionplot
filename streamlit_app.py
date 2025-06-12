@@ -41,20 +41,27 @@ elif st.session_state.page == "plot":
         # Plot-Konfiguration
         chunks = st.number_input("Wie viele Sätze sollen gruppiert werden?", min_value=1, step=1, value=5)
         template = st.selectbox("Wähle ein Plot-Template:", options=templates)
-    
-        # Menübanner für Plottyp-Auswahl
-        selected_plot = st.radio("Wähle die Art der Darstellung:", options=plot_types, horizontal=True)
 
         st.write(f"Template: `{template}`, Gruppierung: {chunks}")
         st.write("➡️ Hier könnte ein interaktiver Plot mit Plotly erscheinen.")
     
     elif selected_plot == "Wordcloud":
         st.subheader("☁️ Wordcloud")
+
+        # Plot-Konfiguration
+        chunks = st.number_input("Wie viele Sätze sollen gruppiert werden?", min_value=1, step=1, value=5)
+        template = st.selectbox("Wähle ein Plot-Template:", options=templates)
+     
         st.write("➡️ Hier könnte eine Wordcloud visualisiert werden.")
     
     elif selected_plot == "Barplot":
         st.subheader("📶 Balkendiagramm")
         st.write(f"Gruppierung: {chunks}")
+
+        # Plot-Konfiguration
+        chunks = st.number_input("Wie viele Sätze sollen gruppiert werden?", min_value=1, step=1, value=5)
+        template = st.selectbox("Wähle ein Plot-Template:", options=templates)
+      
         st.write("➡️ Hier könnte ein Balkendiagramm erscheinen.")
 
     st.divider()
