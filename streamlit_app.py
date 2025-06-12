@@ -23,6 +23,11 @@ if st.session_state.page == "input":
         else:
             st.error("Please enter a valid URL.")
 
+    st.divider()
+    st.markdown("#### 🎬 While you're waiting, enjoy this short video:")
+    # Embed a funny video (replace the URL if you prefer another one)
+    st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")  # Classic internet surprise
+
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
     st.title("Emotionplot – Step 2")
