@@ -3,20 +3,20 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 
-def load_json_to_dataframe(json_file):
-    try:
-        with open(json_file, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+# def load_json_to_dataframe(json_file):
+#     try:
+#         with open(json_file, 'r', encoding='utf-8') as file:
+#             data = json.load(file)
 
-        # Convert JSON data into a Pandas DataFrame
-        if isinstance(data, list):
-            df = pd.DataFrame(data)
-        elif isinstance(data, dict):
-            df = pd.DataFrame.from_dict(data, orient='index')
-        else:
-            raise ValueError("Unsupported JSON format")
+#         # Convert JSON data into a Pandas DataFrame
+#         if isinstance(data, list):
+#             df = pd.DataFrame(data)
+#         elif isinstance(data, dict):
+#             df = pd.DataFrame.from_dict(data, orient='index')
+#         else:
+#             raise ValueError("Unsupported JSON format")
 
-        return df
+#         return df
 
     except Exception as e:
         print(f"Error loading JSON: {e}")
@@ -173,7 +173,7 @@ elif st.session_state.page == "plot":
             # Try to convert JSON data to DataFrame
             try:
                 if isinstance(data_source, dict):
-                    df = pd.DataFrame(data_source)
+                    #df = pd.DataFrame(data_source)
                 else:  # likely a list of dicts
                     df = pd.DataFrame(data_source)
                 # Try to ensure there is a "chunk" column
