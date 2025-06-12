@@ -150,10 +150,10 @@ elif st.session_state.page == "plot":
         if data_source is not None:
             # Try to convert JSON data to DataFrame
             try:
-                if isinstance(data_source, dict):
-                    df = pd.DataFrame(data_source)
+                if isinstance(file_data, dict):
+                    df = pd.DataFrame(file_data)
                 else:  # likely a list of dicts
-                    df = pd.DataFrame(data_source)
+                    df = pd.DataFrame(file_data)
                 # Try to ensure there is a "chunk" column
                 if "chunk" not in df.columns:
                     df["chunk"] = df.index.astype(str)
