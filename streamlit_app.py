@@ -1,4 +1,6 @@
 import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
 
 # Initialize page state
 if "page" not in st.session_state:
@@ -8,8 +10,7 @@ if "page" not in st.session_state:
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
-
-import streamlit as st
+# df = pd.read_csv('data/...')
 
 # Initialize page state
 if "page" not in st.session_state:
@@ -71,7 +72,6 @@ elif st.session_state.page == "plot":
         st.write(f"Template: `{template_interactive}`, Grouping: {chunks_interactive}")
         st.write("➡️ This is where the interactive Plotly chart would appear.")
 
-    import plotly.graph_objects as go
 
 def plot_stacked_emotions(df, group_size=5, exclude_neutral=True):
     """
@@ -191,6 +191,8 @@ for emotion in custom_order:
         st.write(f"Max words: {max_words}, Background color: {background_color}")
         st.write("➡️ This is where the word cloud would be displayed.")
 
+#plot_stacked_emotions(df)
+
 def generate_wordclouds(df, chunk_size):
     """
     Generates word clouds for grouped sentences.
@@ -214,17 +216,17 @@ def generate_wordclouds(df, chunk_size):
 
     # Generate word cloud for each sentence group
     for i, row in grouped_words.iterrows():
-        wordcloud = WordCloud(width=400, height=400, background_color="white").generate(row["words"])
-        axes[i].imshow(wordcloud, interpolation="bilinear")
-        axes[i].axis("off")
-        axes[i].set_title(f"Chunk {row['Sentence_Group']}")
+        #wordcloud = WordCloud(width=400, height=400, background_color="white").generate(row["words"])
+        #axes[i].imshow(wordcloud, interpolation="bilinear")
+        #axes[i].axis("off")
+        #axes[i].set_title(f"Chunk {row['Sentence_Group']}")
 
     # Show the word clouds
     plt.tight_layout()
     plt.show()
 
 
-generate_wordclouds(df, max_sentences)
+#generate_wordclouds(df, max_sentences)
 
 
     # === Barplot ===
