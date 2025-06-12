@@ -1,6 +1,6 @@
 import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
+#import pandas as pd
+#import plotly.graph_objects as go
 
 # Initialize page state
 if "page" not in st.session_state:
