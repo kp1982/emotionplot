@@ -73,101 +73,101 @@ elif st.session_state.page == "plot":
         st.write("➡️ This is where the interactive Plotly chart would appear.")
 
 
-def plot_stacked_emotions(df, group_size=5, exclude_neutral=True):
-    """
-    Plots a stacked bar chart of emotion scores from a DataFrame using Plotly.
+# def plot_stacked_emotions(df, group_size=5, exclude_neutral=True):
+#     """
+#     Plots a stacked bar chart of emotion scores from a DataFrame using Plotly.
 
-    Parameters:
-    - emotions_df (pd.DataFrame): A DataFrame containing emotion scores per chunk.
-    - group_size (int): Number of chunks to group together for aggregation.
-    - exclude_neutral (bool): Whether to exclude the "neutral" emotion from the plot.
+#     Parameters:
+#     - emotions_df (pd.DataFrame): A DataFrame containing emotion scores per chunk.
+#     - group_size (int): Number of chunks to group together for aggregation.
+#     - exclude_neutral (bool): Whether to exclude the "neutral" emotion from the plot.
 
-    Returns:
-    - None (shows an interactive plot)
-    """
-    # Select emotions to plot
-    emotions_to_plot = [
-        col for col in df.columns
-     #   if not (exclude_neutral and col.lower() == "neutral")
-    ]
+#     Returns:
+#     - None (shows an interactive plot)
+#     """
+#     # Select emotions to plot
+#     emotions_to_plot = [
+#         col for col in df.columns
+#      #   if not (exclude_neutral and col.lower() == "neutral")
+#     ]
 
-    # Group emotion scores
-    grouped = df[emotions_to_plot].groupby(df.index // group_size).sum()
+#     # Group emotion scores
+#     grouped = df[emotions_to_plot].groupby(df.index // group_size).sum()
 
-    template_to_select = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
-    template_selected = "plotly_white"
+#     template_to_select = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
+#     template_selected = "plotly_white"
 
-    #fig = go.Figure()
+#     #fig = go.Figure()
 
-    default_visible = ["anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"]  # Emotions to show by default
-
-
-    # Your custom emotion order (must match column names in emotions_df)
-    custom_order = [
-        "anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"
-        'love',
-        'gratitude',
-        'pride',
-        'relief',
-        'amusement',
-        'admiration',
-        'approval',
-        'excitement',
-        'optimism',
-        'caring',
-        'desire',
-        'realization',
-        'confusion',
-        'nervousness',
-        'embarrassment',
-        'annoyance',
-        'disappointment',
-        'remorse',
-        'disgust',
-        'grief',
-        'neutral'
-    ]
+#     default_visible = ["anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"]  # Emotions to show by default
 
 
-# Loop through custom order
-for emotion in custom_order:
-    if emotion in emotions_df.columns:
-        fig.add_trace(
-            go.Scatter(
-                x=emotions_df.index,
-                y=emotions_df[emotion],
-                mode='lines',
-                name=emotion,
-                customdata=df["chunk"],
-                hovertemplate=(
-                    "<b>Chunk Index:</b> %{x}<br>" +
-                    "<b>Emotion:</b> %{fullData.name}<br>" +
-                    "<b>Emotion Score:</b> %{y:.2f}<br>" +
-                    "<b>Text:</b> %{customdata}<extra></extra>"
-                ),
-                visible=True if emotion in default_visible else "legendonly"
-            )
-        )
+#     # Your custom emotion order (must match column names in emotions_df)
+#     custom_order = [
+#         "anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"
+#         'love',
+#         'gratitude',
+#         'pride',
+#         'relief',
+#         'amusement',
+#         'admiration',
+#         'approval',
+#         'excitement',
+#         'optimism',
+#         'caring',
+#         'desire',
+#         'realization',
+#         'confusion',
+#         'nervousness',
+#         'embarrassment',
+#         'annoyance',
+#         'disappointment',
+#         'remorse',
+#         'disgust',
+#         'grief',
+#         'neutral'
+#     ]
 
-    # Configure layout
-    fig.update_layout(
-        barmode='stack',
-        title="Stacked Emotion Scores per Chunk",
-        xaxis=dict(
-            title="Chunk Index",
-            rangeslider=dict(visible=True),
-            type="linear"
-        ),
-        yaxis=dict(
-            title="Emotion Score"
-        ),
-        height=600,
-        legend_title="Emotion",
-        dragmode="pan",
-        template=template_selected
-    )
 
-    fig.show(config={"scrollZoom": True})
+# # Loop through custom order
+# for emotion in custom_order:
+#     if emotion in emotions_df.columns:
+#         fig.add_trace(
+#             go.Scatter(
+#                 x=emotions_df.index,
+#                 y=emotions_df[emotion],
+#                 mode='lines',
+#                 name=emotion,
+#                 customdata=df["chunk"],
+#                 hovertemplate=(
+#                     "<b>Chunk Index:</b> %{x}<br>" +
+#                     "<b>Emotion:</b> %{fullData.name}<br>" +
+#                     "<b>Emotion Score:</b> %{y:.2f}<br>" +
+#                     "<b>Text:</b> %{customdata}<extra></extra>"
+#                 ),
+#                 visible=True if emotion in default_visible else "legendonly"
+#             )
+#         )
+
+#     # Configure layout
+#     fig.update_layout(
+#         barmode='stack',
+#         title="Stacked Emotion Scores per Chunk",
+#         xaxis=dict(
+#             title="Chunk Index",
+#             rangeslider=dict(visible=True),
+#             type="linear"
+#         ),
+#         yaxis=dict(
+#             title="Emotion Score"
+#         ),
+#         height=600,
+#         legend_title="Emotion",
+#         dragmode="pan",
+#         template=template_selected
+#     )
+
+#     #fig.show(config={"scrollZoom": True})
 
 
     # === Wordcloud ===
@@ -193,7 +193,7 @@ for emotion in custom_order:
 
 #plot_stacked_emotions(df)
 
-def generate_wordclouds(df, chunk_size):
+#def generate_wordclouds(df, chunk_size):
     """
     Generates word clouds for grouped sentences.
 
@@ -206,24 +206,24 @@ def generate_wordclouds(df, chunk_size):
     """
 
     # Assign sentence groups dynamically based on chunk size
-    df["Sentence_Group"] = df.index // chunk_size
+    #df["Sentence_Group"] = df.index // chunk_size
 
     # Group emotional words by sentence group
-    grouped_words = df.groupby("Sentence_Group")["words"].apply(lambda x: " ".join(x)).reset_index()
+    #grouped_words = df.groupby("Sentence_Group")["words"].apply(lambda x: " ".join(x)).reset_index()
 
     # Create word clouds for each sentence group
-    fig, axes = plt.subplots(1, len(grouped_words), figsize=(15, 6))
+    #fig, axes = plt.subplots(1, len(grouped_words), figsize=(15, 6))
 
     # Generate word cloud for each sentence group
-    for i, row in grouped_words.iterrows():
+    #for i, row in grouped_words.iterrows():
         #wordcloud = WordCloud(width=400, height=400, background_color="white").generate(row["words"])
         #axes[i].imshow(wordcloud, interpolation="bilinear")
         #axes[i].axis("off")
         #axes[i].set_title(f"Chunk {row['Sentence_Group']}")
 
     # Show the word clouds
-    plt.tight_layout()
-    plt.show()
+    #plt.tight_layout()
+    #plt.show()
 
 
 #generate_wordclouds(df, max_sentences)
