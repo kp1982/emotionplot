@@ -11,19 +11,19 @@ if "page" not in st.session_state:
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
-def plot_stacked_emotions(df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
+def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
     """
     Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
     """
     # Select emotions to plot
     emotions_to_plot = [
-        col for col in df.columns
+        col for col in emotions_df.columns
         if col not in ["chunk", "text"] and not (exclude_neutral and col.lower() == "neutral")
     ]
 
     # Group emotion scores
-    grouped = df[emotions_to_plot].groupby(emotions_df.index // group_size).sum()
-    grouped["chunk"] = df["chunk"].groupby(emotions_df.index // group_size).first()
+    grouped = emotions_df[emotions_to_plot].groupby(emotions_df.index // group_size).sum()
+    grouped["chunk"] = emotions_df["chunk"].groupby(emotions_df.index // group_size).first()
 
     # Custom emotion order (adjust to your data)
     custom_order = [
@@ -80,9 +80,6 @@ if st.session_state.page == "input":
 
     url = st.text_input("Enter URL")
     uploaded_file = st.file_uploader("Or upload a JSON file", type="json")
-
-
-
 
     file_data = None
     json_error = None
