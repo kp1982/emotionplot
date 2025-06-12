@@ -16,10 +16,18 @@ if st.session_state.page == "input":
 
     file = st.file_uploader("JSON-Datei auswählen", type=["json"])
     if file is not None:
-        data = json.load(file)
-        st.session_state.data = data
-        st.session_state.page = "plot"
-        st.experimental_rerun()
+        # Datei als Text lesen und dann als JSON parsen
+        file_content = file.read()
+        try:
+            # Falls file_content bytes ist, dekodieren
+            if isinstance(file_content, bytes):
+                file_content = file_content.decode("utf-8")
+            data = json.loads(file_content)
+            st.session_state.data = data
+            st.session_state.page = "plot"
+            st.experimental_rerun()
+        except Exception as e:
+            st.error(f"Fehler beim Einlesen der JSON-Datei: {e}")
 
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
 
