@@ -9,6 +9,16 @@ templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "sim
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
 
+import streamlit as st
+
+# Initialize page state
+if "page" not in st.session_state:
+    st.session_state.page = "input"
+
+# Available templates and plot types
+templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
+plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
+
 # Page 1 – URL Input
 if st.session_state.page == "input":
     st.title("Emotionplot – Step 1")
@@ -26,6 +36,10 @@ if st.session_state.page == "input":
 
     st.divider()
     st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
+    
+    # Display a funny looping GIF
+    st.image("https://media.giphy.com/media/3o7TKtnuHOHHUjR38Y/giphy.gif")
+
 
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
