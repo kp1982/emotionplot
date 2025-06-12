@@ -110,18 +110,6 @@ if st.session_state.page == "input":
     # Display a funny looping GIF
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
 
-if isinstance(data_source, dict):
-    # Prüfe, ob Werte Listen sind (Fall 2)
-    if all(isinstance(v, list) for v in data_source.values()):
-        df = pd.DataFrame(data_source)
-    else:
-        # Falls dict, aber nicht Listen als Werte: evtl. einzelnes Element als Liste verpacken
-        df = pd.DataFrame([data_source])
-elif isinstance(data_source, list):
-    df = pd.DataFrame(data_source)
-else:
-    st.error("Json-Format wird nicht unterstützt.")
-
 
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
