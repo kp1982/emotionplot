@@ -34,8 +34,8 @@ if st.session_state.page == "input":
         else:
             st.error("Please enter a valid URL.")
 
-    st.divider()
-    st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
+    #st.divider()
+    #st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
     
     # Display a funny looping GIF
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
