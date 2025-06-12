@@ -3,20 +3,20 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 
-# def load_json_to_dataframe(json_file):
-#     try:
-#         with open(json_file, 'r', encoding='utf-8') as file:
-#             data = json.load(file)
+ def load_json_to_dataframe(json_file):
+     try:
+         with open(json_file, 'r', encoding='utf-8') as file:
+             data = json.load(file)
 
-#         # Convert JSON data into a Pandas DataFrame
-#         if isinstance(data, list):
-#             df = pd.DataFrame(data)
-#         elif isinstance(data, dict):
-#             df = pd.DataFrame.from_dict(data, orient='index')
-#         else:
-#             raise ValueError("Unsupported JSON format")
+         # Convert JSON data into a Pandas DataFrame
+         if isinstance(data, list):
+             emotion_df = pd.DataFrame(data)
+         elif isinstance(data, dict):
+             emotion_df = pd.DataFrame.from_dict(data, orient='index')
+         else:
+             raise ValueError("Unsupported JSON format")
 
-#         return df
+         return emotion_df
 
     except Exception as e:
         print(f"Error loading JSON: {e}")
