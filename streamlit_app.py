@@ -1,22 +1,22 @@
 import streamlit as st
 import json
 
-# Initialize page state
+# Initialisierung des Seitenzustands
 if "page" not in st.session_state:
     st.session_state.page = "input"
 
-# Available templates and plot types
+# Optionen für Templates und Plot-Typen
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
-# Page 1 – JSON Upload
+# Seite 1 – JSON Upload
 if st.session_state.page == "input":
-    st.title("Emotionplot – Step 1")
-    st.write("Bitte lade eine JSON-Datei hoch:")
+    st.title("Emotionplot – Schritt 1")
+    st.write("Lade eine JSON-Datei hoch, die deine Daten enthält.")
 
-    uploaded_file = st.file_uploader("Upload JSON file", type="json")
+    uploaded_file = st.file_uploader("Wähle eine JSON-Datei aus", type="json")
 
-    if st.button("Next"):
+    if st.button("Weiter"):
         if uploaded_file:
             try:
                 data = json.load(uploaded_file)
@@ -24,13 +24,9 @@ if st.session_state.page == "input":
                 st.session_state.page = "plot"
                 st.experimental_rerun()
             except json.JSONDecodeError:
-                st.error("❌ Fehler beim Einlesen der JSON-Datei. Bitte überprüfe das Format.")
+                st.error("Fehler: Ungültige JSON-Datei.")
         else:
-            st.error("⚠️ Bitte lade eine gültige JSON-Datei hoch.")
-
-    # Optionaler Spaß
-    st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-
+            st.error("Bitte lade eine Datei hoch.")
 
     #st.divider()
     #st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
