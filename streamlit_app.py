@@ -174,8 +174,8 @@ elif st.session_state.page == "plot":
     elif selected_plot == "Wordcloud":
         st.subheader("☁️ Wordcloud")
 
-        max_sentences = st.slider(
-            "Number of sentences in the Wordcloud:",
+        max_words = st.slider(
+            "Number of words in the Wordcloud:",
             min_value=10,
             max_value=200,
             value=100,
