@@ -30,7 +30,7 @@ if st.session_state.page == "input":
         if url:
             st.session_state.url = url
             st.session_state.page = "plot"
-            st.experimental_rerun()
+           # st.experimental_rerun()
         else:
             st.error("Please enter a valid URL.")
 
