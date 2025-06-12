@@ -11,7 +11,7 @@ if "page" not in st.session_state:
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
-def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_dark"):
+def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
     """
     Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
     """
