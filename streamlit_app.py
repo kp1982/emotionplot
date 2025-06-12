@@ -1,47 +1,34 @@
 import streamlit as st
-import pandas as pd
-import json
-import io
-import ast
 
+# Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "input"
 
+# Available templates and plot types
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
+# Page 1 – URL Input
 if st.session_state.page == "input":
-    st.title("Emotionplot – Schritt 1")
-    uploaded_file = st.file_uploader("Wähle eine JSON-Datei", type="json")
+    st.title("Emotionplot – Step 1")
+    st.write("Please enter the URL:")
 
-    if st.button("Weiter"):
-        if uploaded_file:
-            try:
-                # BytesIO -> StringIO für json.load
-                stringio = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
-                raw_data = json.load(stringio)
-            except json.JSONDecodeError:
-                try:
-                    # Fallback: Python-likes dict mit ast.literal_eval parsen
-                    raw_text = uploaded_file.getvalue().decode("utf-8")
-                    raw_data = ast.literal_eval(raw_text)
-                    st.warning("⚠️ Ungültiges JSON erkannt – automatisch konvertiert.")
-                except Exception as e:
-                    st.error(f"Fehler beim Parsen der Datei: {str(e)}")
-                    st.stop()
-            except Exception as e:
-                st.error(f"Unerwarteter Fehler: {str(e)}")
-                st.stop()
+    url = st.text_input("Enter URL")
 
-            if "emotions" in raw_data:
-                df = pd.DataFrame(raw_data["emotions"])
-                st.session_state.data = df
-                st.session_state.page = "plot"
-                st.experimental_rerun()
-            else:
-                st.error("Die Datei enthält keinen 'emotions'-Schlüssel.")
+    if st.button("Next"):
+        if url:
+            st.session_state.url = url
+            st.session_state.page = "plot"
+            st.experimental_rerun()
         else:
-            st.error("Bitte lade eine JSON-Datei hoch.")
+            st.error("Please enter a valid URL.")
+
+    #st.divider()
+    #st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
+    
+    # Display a funny looping GIF
+    st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+
 
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
