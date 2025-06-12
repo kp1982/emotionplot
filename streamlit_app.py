@@ -25,7 +25,7 @@ if st.session_state.page == "input":
             data = json.loads(file_content)
             st.session_state.data = data
             st.session_state.page = "plot"
-            st.experimental_rerun()
+            st.rerun()  # <-- HIER geändert
         except Exception as e:
             st.error(f"Fehler beim Einlesen der JSON-Datei: {e}")
 
@@ -96,4 +96,4 @@ elif st.session_state.page == "plot":
     st.divider()
     if st.button("Zurück"):
         st.session_state.page = "input"
-        st.experimental_rerun()
+        st.rerun()  # <-- HIER geändert
