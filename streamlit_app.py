@@ -8,17 +8,6 @@ if "page" not in st.session_state:
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
-
-import streamlit as st
-
-# Initialize page state
-if "page" not in st.session_state:
-    st.session_state.page = "input"
-
-# Available templates and plot types
-templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
-plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
-
 # Page 1 – URL Input
 if st.session_state.page == "input":
     st.title("Emotionplot – Step 1")
@@ -34,12 +23,8 @@ if st.session_state.page == "input":
         else:
             st.error("Please enter a valid URL.")
 
-    #st.divider()
-    #st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
-    
     # Display a funny looping GIF
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-
 
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
@@ -108,9 +93,6 @@ elif st.session_state.page == "plot":
 
     st.divider()
 
-    if st.button("Back"):
-        st.session_state.page = "input"
-        st.experimental_rerun()
     if st.button("Back"):
         st.session_state.page = "input"
         st.rerun()
