@@ -97,7 +97,7 @@ def plot_stacked_emotions(df, group_size=5, exclude_neutral=True):
     template_to_select = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
     template_selected = "plotly_white"
 
-    fig = go.Figure()
+    #fig = go.Figure()
 
     default_visible = ["anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"]  # Emotions to show by default
 
