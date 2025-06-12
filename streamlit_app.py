@@ -11,6 +11,7 @@ if "page" not in st.session_state:
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
+
 def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
     """
     Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
@@ -119,19 +120,16 @@ elif st.session_state.page == "plot":
         st.warning("Laden von Daten aus einer URL ist in diesem Beispiel nicht implementiert.")
     elif st.session_state.get("file_data") is not None:
         st.write("📄 JSON file uploaded and loaded.")
-        # Optionally show part of the JSON:
         with st.expander("Show JSON Preview"):
             st.json(st.session_state.file_data)
         data_source = st.session_state.file_data
     else:
         st.error("No data source found. Please go back and enter a URL or upload a JSON file.")
 
-    # Plot selection menu
     st.subheader("📋 Select Plot Type")
     selected_plot = st.radio("Choose a plot:", options=plot_types, horizontal=True)
     st.divider()
 
-    # === Interactive Plot ===
     if selected_plot == "Interactive Plot":
         st.subheader("📊 Interactive Plot")
         chunks_interactive = st.number_input(
@@ -146,20 +144,28 @@ elif st.session_state.page == "plot":
             key="template_interactive"
         )
         if data_source is not None:
-            # Try to convert JSON data to DataFrame
             try:
+                # RICHTIGES Einlesen:
                 if isinstance(data_source, dict):
+                    # Sind alle Werte Listen? Dann direkt als DataFrame
+                    if all(isinstance(v, list) for v in data_source.values()):
+                        df = pd.DataFrame(data_source)
+                    else:
+                        # Einzelnes Objekt, als eine Zeile speichern
+                        df = pd.DataFrame([data_source])
+                elif isinstance(data_source, list):
                     df = pd.DataFrame(data_source)
-                else:  # likely a list of dicts
-                    df = pd.DataFrame(data_source)
-                # Try to ensure there is a "chunk" column
-                if "chunk" not in df.columns:
-                    df["chunk"] = df.index.astype(str)
-                plot_stacked_emotions(
-                    df,
-                    group_size=chunks_interactive,
-                    template_selected=template_interactive
-                )
+                else:
+                    st.error("Json-Format wird nicht unterstützt.")
+                    df = None
+                if df is not None:
+                    if "chunk" not in df.columns:
+                        df["chunk"] = df.index.astype(str)
+                    plot_stacked_emotions(
+                        df,
+                        group_size=chunks_interactive,
+                        template_selected=template_interactive
+                    )
             except Exception as e:
                 st.error(f"Error while plotting: {e}")
         else:
