@@ -1,5 +1,6 @@
-import streamlit as st
+import re
 import json
+import streamlit as st
 
 # Initialisierung des Seitenzustands
 if "page" not in st.session_state:
@@ -10,23 +11,16 @@ templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "sim
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
 # Seite 1 – JSON Upload
-if st.session_state.page == "input":
-    st.title("Emotionplot – Schritt 1")
-    st.write("Lade eine JSON-Datei hoch, die deine Daten enthält.")
-
-    uploaded_file = st.file_uploader("Wähle eine JSON-Datei aus", type="json")
-
-    if st.button("Weiter"):
-        if uploaded_file:
-            try:
-                data = json.load(uploaded_file)
-                st.session_state.json_data = data
-                st.session_state.page = "plot"
-                st.experimental_rerun()
-            except json.JSONDecodeError:
-                st.error("Fehler: Ungültige JSON-Datei.")
-        else:
-            st.error("Bitte lade eine Datei hoch.")
+uploaded_file = st.file_uploader("Upload JSON file", type=["json", "txt"])
+if uploaded_file:
+    content = uploaded_file.read().decode("utf-8")
+    # Versuche einfache Keys mit Anführungszeichen zu versehen
+    fixed_content = re.sub(r'(\w+):', r'"\1":', content)
+    try:
+        data = json.loads(fixed_content)
+        st.write(data)
+    except Exception as e:
+        st.error(f"Fehler beim Parsen nach Fix: {e}")
 
     #st.divider()
     #st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
