@@ -81,14 +81,7 @@ if st.session_state.page == "input":
     url = st.text_input("Enter URL")
     uploaded_file = st.file_uploader("Or upload a JSON file", type="json")
 
-# Load JSON file
-with open("uploaded_file.json", "r") as f:
-    data = json.load(f)
 
-# Convert the 'emotions' list into a DataFrame
-emotions_df = pd.DataFrame(data["emotions"], columns=['chunk', 'Predicted_Emotion'])
-
-print(df)
 
 
     file_data = None
