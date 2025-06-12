@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-st.title("Emotionplot")
+st.title("Emotionplot!!!!!")
 st.write("Instructions for user.")
 
 # Define available templates
