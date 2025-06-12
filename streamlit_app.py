@@ -1,40 +1,47 @@
 import streamlit as st
 import pandas as pd
 import json
+import io
+import ast
 
-# Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "input"
 
-# Templates und Plottypen
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
-# Page 1 – JSON-Upload statt URL
 if st.session_state.page == "input":
     st.title("Emotionplot – Schritt 1")
-    st.write("📂 Lade deine JSON-Datei hoch:")
-
     uploaded_file = st.file_uploader("Wähle eine JSON-Datei", type="json")
 
     if st.button("Weiter"):
         if uploaded_file:
-            # JSON-Daten einlesen
-            raw_data = json.load(uploaded_file)
+            try:
+                # BytesIO -> StringIO für json.load
+                stringio = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
+                raw_data = json.load(stringio)
+            except json.JSONDecodeError:
+                try:
+                    # Fallback: Python-likes dict mit ast.literal_eval parsen
+                    raw_text = uploaded_file.getvalue().decode("utf-8")
+                    raw_data = ast.literal_eval(raw_text)
+                    st.warning("⚠️ Ungültiges JSON erkannt – automatisch konvertiert.")
+                except Exception as e:
+                    st.error(f"Fehler beim Parsen der Datei: {str(e)}")
+                    st.stop()
+            except Exception as e:
+                st.error(f"Unerwarteter Fehler: {str(e)}")
+                st.stop()
 
-            # Optional: Fehlerbehandlung falls Schlüssel fehlt
             if "emotions" in raw_data:
-                st.session_state.data = pd.DataFrame(raw_data["emotions"])
+                df = pd.DataFrame(raw_data["emotions"])
+                st.session_state.data = df
                 st.session_state.page = "plot"
                 st.experimental_rerun()
             else:
-                st.error("Die JSON-Datei enthält keinen 'emotions'-Schlüssel.")
+                st.error("Die Datei enthält keinen 'emotions'-Schlüssel.")
         else:
-            st.error("Bitte lade eine gültige JSON-Datei hoch.")
-
-    # Optional: GIF anzeigen
-    st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-
+            st.error("Bitte lade eine JSON-Datei hoch.")
 
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
