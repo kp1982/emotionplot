@@ -1,8 +1,15 @@
 import streamlit as st
-import pandas as pd
-import json
-import io
-import ast
+
+# Initialize page state
+if "page" not in st.session_state:
+    st.session_state.page = "input"
+
+# Available templates and plot types
+templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
+plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
+
+
+import streamlit as st
 
 # Initialize page state
 if "page" not in st.session_state:
@@ -13,46 +20,19 @@ templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "sim
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
 # Page 1 – URL Input
-#if st.session_state.page == "input":
- #   st.title("Emotionplot – Step 1")
-  #  st.write("Please enter the URL:")
+if st.session_state.page == "input":
+    st.title("Emotionplot – Step 1")
+    st.write("Please enter the URL:")
 
-   # url = st.text_input("Enter URL")
+    url = st.text_input("Enter URL")
 
-    #if st.button("Next"):
-     #   if url:
-      #      st.session_state.url = url
-       #     st.session_state.page = "plot"
-        #    st.experimental_rerun()
-        #else:
-         #   st.error("Please enter a valid URL.")
-
-# JSON-Datei laden
-if uploaded_file:
-    try:
-        # Versuche normales JSON zu laden
-        stringio = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
-        raw_data = json.load(stringio)
-    except json.JSONDecodeError:
-        try:
-            # Fallback: Versuche, mit ast.literal_eval zu parsen
-            raw_text = uploaded_file.getvalue().decode("utf-8")
-            raw_data = ast.literal_eval(raw_text)
-            st.warning("⚠️ Die Datei war kein gültiges JSON – wurde automatisch konvertiert.")
-        except Exception as e:
-            st.error(f"❌ Fehler beim Parsen der Datei: {str(e)}")
-            st.stop()
-
-    # Überprüfe Struktur
-    if "emotions" in raw_data:
-        df = pd.DataFrame(raw_data["emotions"])
-        st.session_state.data = df
-        st.session_state.page = "plot"
-        st.experimental_rerun()
-    else:
-        st.error("❌ Die Datei enthält keinen 'emotions'-Schlüssel.")
-
-
+    if st.button("Next"):
+        if url:
+            st.session_state.url = url
+            st.session_state.page = "plot"
+            st.experimental_rerun()
+        else:
+            st.error("Please enter a valid URL.")
 
     #st.divider()
     #st.markdown("#### 🐵 While you're waiting, enjoy this GIF:")
@@ -64,8 +44,7 @@ if uploaded_file:
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
     st.title("Emotionplot – Step 2")
- #   st.write(f"🔗 URL: {st.session_state.url}")
-    st.write("✅ JSON-Datei erfolgreich geladen!")
+    st.write(f"🔗 URL: {st.session_state.url}")
 
     # Plot selection menu
     st.subheader("📋 Select Plot Type")
