@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 import io
+import ast
 
 # Initialize page state
 if "page" not in st.session_state:
@@ -26,31 +27,30 @@ plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
         #else:
          #   st.error("Please enter a valid URL.")
 
-# Page 1 – JSON-Datei hochladen
-if st.session_state.page == "input":
-    st.title("Emotionplot – Schritt 1")
-    st.write("📂 Lade deine JSON-Datei hoch:")
+# JSON-Datei laden
+if uploaded_file:
+    try:
+        # Versuche normales JSON zu laden
+        stringio = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
+        raw_data = json.load(stringio)
+    except json.JSONDecodeError:
+        try:
+            # Fallback: Versuche, mit ast.literal_eval zu parsen
+            raw_text = uploaded_file.getvalue().decode("utf-8")
+            raw_data = ast.literal_eval(raw_text)
+            st.warning("⚠️ Die Datei war kein gültiges JSON – wurde automatisch konvertiert.")
+        except Exception as e:
+            st.error(f"❌ Fehler beim Parsen der Datei: {str(e)}")
+            st.stop()
 
-    uploaded_file = st.file_uploader("Wähle eine JSON-Datei", type="json")
-
-    if st.button("Weiter"):
-        if uploaded_file:
-            try:
-                # JSON als Text einlesen und laden
-                stringio = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
-                raw_data = json.load(stringio)
-
-                if "emotions" in raw_data:
-                    df = pd.DataFrame(raw_data["emotions"])
-                    st.session_state.data = df
-                    st.session_state.page = "plot"
-                    st.experimental_rerun()
-                else:
-                    st.error("Die JSON-Datei enthält keinen 'emotions'-Schlüssel.")
-            except json.JSONDecodeError as e:
-                st.error(f"Fehler beim Lesen der JSON-Datei: {str(e)}")
-        else:
-            st.error("Bitte lade eine gültige JSON-Datei hoch.")
+    # Überprüfe Struktur
+    if "emotions" in raw_data:
+        df = pd.DataFrame(raw_data["emotions"])
+        st.session_state.data = df
+        st.session_state.page = "plot"
+        st.experimental_rerun()
+    else:
+        st.error("❌ Die Datei enthält keinen 'emotions'-Schlüssel.")
 
 
 
