@@ -3,7 +3,6 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 
-
 # Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "input"
@@ -12,78 +11,8 @@ if "page" not in st.session_state:
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
-# Page 1 – URL or JSON Input
-if st.session_state.page == "input":
-    st.title("Emotionplot – Step 1")
-    st.write("Please enter the URL **or** upload a JSON file:")
 
-    url = st.text_input("Enter URL")
-    uploaded_file = st.file_uploader("Or upload a JSON file", type="json")
-
-    file_data = None
-    json_error = None
-
-    if uploaded_file is not None:
-        try:
-            file_data = json.load(uploaded_file)
-            st.session_state.file_data = file_data
-            st.session_state.url = None  # Clear URL if a file is uploaded
-            st.success("JSON file uploaded successfully!")
-        except Exception as e:
-            json_error = str(e)
-            st.error(f"Invalid JSON file: {json_error}")
-
-    if st.button("Next"):
-        if uploaded_file and file_data is not None:
-            st.session_state.page = "plot"
-            st.rerun()
-        elif url:
-            st.session_state.url = url
-            st.session_state.file_data = None  # Clear file data if a URL is entered
-            st.session_state.page = "plot"
-            st.rerun()
-        else:
-            st.error("Please enter a valid URL or upload a JSON file.")
-
-    # Display a funny looping GIF
-    st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-
-# Page 2 – Plot Output
-elif st.session_state.page == "plot":
-    st.title("Emotionplot – Step 2")
-    if st.session_state.get("url"):
-        st.write(f"🔗 URL: {st.session_state.url}")
-    elif st.session_state.get("file_data") is not None:
-        st.write("📄 JSON file uploaded and loaded.")
-        # Optionally show part of the JSON:
-        with st.expander("Show JSON Preview"):
-            st.json(st.session_state.file_data)
-    else:
-        st.error("No data source found. Please go back and enter a URL or upload a JSON file.")
-
-    # Plot selection menu
-    st.subheader("📋 Select Plot Type")
-    selected_plot = st.radio("Choose a plot:", options=plot_types, horizontal=True)
-
-    st.divider()
-
-    # === Interactive Plot ===
-    if selected_plot == "Interactive Plot":
-        st.subheader("📊 Interactive Plot")
-        
-        chunks_interactive = st.number_input(
-            "How many sentences should be grouped? (Interactive Plot)",
-            min_value=1,
-            step=1,
-            key="chunks_interactive"
-        )
-        template_interactive = st.selectbox(
-            "Choose a plot template:",
-            options=templates,
-            key="template_interactive"
-        )
-
-    def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
+def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
     """
     Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
     """
@@ -144,9 +73,111 @@ elif st.session_state.page == "plot":
     )
 
     st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": True})
-        
-        st.write(f"Template: `{template_interactive}`, Grouping: {chunks_interactive}")
-        st.write("➡️ This is where the interactive Plotly chart would appear.")
+
+# Page 1 – URL or JSON Input
+if st.session_state.page == "input":
+    st.title("Emotionplot – Step 1")
+    st.write("Please enter the URL **or** upload a JSON file:")
+
+    url = st.text_input("Enter URL")
+    uploaded_file = st.file_uploader("Or upload a JSON file", type="json")
+
+    file_data = None
+    json_error = None
+
+    if uploaded_file is not None:
+        try:
+            file_data = json.load(uploaded_file)
+            st.session_state.file_data = file_data
+            st.session_state.url = None  # Clear URL if a file is uploaded
+            st.success("JSON file uploaded successfully!")
+        except Exception as e:
+            json_error = str(e)
+            st.error(f"Invalid JSON file: {json_error}")
+
+    if st.button("Next"):
+        if uploaded_file and file_data is not None:
+            st.session_state.page = "plot"
+            st.rerun()
+        elif url:
+            st.session_state.url = url
+            st.session_state.file_data = None  # Clear file data if a URL is entered
+            st.session_state.page = "plot"
+            st.rerun()
+        else:
+            st.error("Please enter a valid URL or upload a JSON file.")
+
+    # Display a funny looping GIF
+    st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+
+if isinstance(data_source, dict):
+    # Prüfe, ob Werte Listen sind (Fall 2)
+    if all(isinstance(v, list) for v in data_source.values()):
+        df = pd.DataFrame(data_source)
+    else:
+        # Falls dict, aber nicht Listen als Werte: evtl. einzelnes Element als Liste verpacken
+        df = pd.DataFrame([data_source])
+elif isinstance(data_source, list):
+    df = pd.DataFrame(data_source)
+else:
+    st.error("Json-Format wird nicht unterstützt.")
+
+
+# Page 2 – Plot Output
+elif st.session_state.page == "plot":
+    st.title("Emotionplot – Step 2")
+    data_source = None
+
+    if st.session_state.get("url"):
+        st.write(f"🔗 URL: {st.session_state.url}")
+        st.warning("Laden von Daten aus einer URL ist in diesem Beispiel nicht implementiert.")
+    elif st.session_state.get("file_data") is not None:
+        st.write("📄 JSON file uploaded and loaded.")
+        # Optionally show part of the JSON:
+        with st.expander("Show JSON Preview"):
+            st.json(st.session_state.file_data)
+        data_source = st.session_state.file_data
+    else:
+        st.error("No data source found. Please go back and enter a URL or upload a JSON file.")
+
+    # Plot selection menu
+    st.subheader("📋 Select Plot Type")
+    selected_plot = st.radio("Choose a plot:", options=plot_types, horizontal=True)
+    st.divider()
+
+    # === Interactive Plot ===
+    if selected_plot == "Interactive Plot":
+        st.subheader("📊 Interactive Plot")
+        chunks_interactive = st.number_input(
+            "How many sentences should be grouped? (Interactive Plot)",
+            min_value=1,
+            step=1,
+            key="chunks_interactive"
+        )
+        template_interactive = st.selectbox(
+            "Choose a plot template:",
+            options=templates,
+            key="template_interactive"
+        )
+        if data_source is not None:
+            # Try to convert JSON data to DataFrame
+            try:
+                if isinstance(data_source, dict):
+                    df = pd.DataFrame(data_source)
+                else:  # likely a list of dicts
+                    df = pd.DataFrame(data_source)
+                # Try to ensure there is a "chunk" column
+                if "chunk" not in df.columns:
+                    df["chunk"] = df.index.astype(str)
+                plot_stacked_emotions(
+                    df,
+                    group_size=chunks_interactive,
+                    template_selected=template_interactive
+                )
+            except Exception as e:
+                st.error(f"Error while plotting: {e}")
+        else:
+            st.info("Please upload a JSON file to see the plot.")
 
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
