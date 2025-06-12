@@ -3,27 +3,6 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 
- # def load_json_to_dataframe(json_file):
- #     try:
- #         with open(json_file, 'r', encoding='utf-8') as file:
- #             data = json.load(file)
-
- #         # Convert JSON data into a Pandas DataFrame
- #         if isinstance(data, list):
- #             emotion_df = pd.DataFrame(data)
- #         elif isinstance(data, dict):
- #             emotion_df = pd.DataFrame.from_dict(data, orient='index')
- #         else:
- #             raise ValueError("Unsupported JSON format")
-
- #         return emotion_df
-
- #    except Exception as e:
- #        print(f"Error loading JSON: {e}")
- #        return None
-
-# Example usage
-
 # Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "input"
@@ -31,7 +10,6 @@ if "page" not in st.session_state:
 # Available templates and plot types
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
-
 
 def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
     """
@@ -109,7 +87,6 @@ if st.session_state.page == "input":
     if uploaded_file is not None:
         try:
             file_data = json.load(uploaded_file)
-            file_data = load_json_to_dataframe(file_data)
             st.session_state.file_data = file_data
             st.session_state.url = None  # Clear URL if a file is uploaded
             st.success("JSON file uploaded successfully!")
@@ -128,10 +105,9 @@ if st.session_state.page == "input":
             st.rerun()
         else:
             st.error("Please enter a valid URL or upload a JSON file.")
-                      
+
     # Display a funny looping GIF
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-
 
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
@@ -173,7 +149,7 @@ elif st.session_state.page == "plot":
             # Try to convert JSON data to DataFrame
             try:
                 if isinstance(data_source, dict):
-                    #df = pd.DataFrame(data_source)
+                    df = pd.DataFrame(data_source)
                 else:  # likely a list of dicts
                     df = pd.DataFrame(data_source)
                 # Try to ensure there is a "chunk" column
