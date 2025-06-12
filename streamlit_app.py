@@ -107,6 +107,8 @@ if st.session_state.page == "input":
         else:
             st.error("Please enter a valid URL or upload a JSON file.")
 
+    file_data.to_csv("file_data.csv", index=False)
+
     # Display a funny looping GIF
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
 
