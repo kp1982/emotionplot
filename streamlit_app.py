@@ -24,7 +24,7 @@ plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
         #else:
          #   st.error("Please enter a valid URL.")
 
-# Page 1 – JSON-Upload statt URL
+# Page 1 – JSON-Datei hochladen
 if st.session_state.page == "input":
     st.title("Emotionplot – Schritt 1")
     st.write("📂 Lade deine JSON-Datei hoch:")
@@ -33,18 +33,23 @@ if st.session_state.page == "input":
 
     if st.button("Weiter"):
         if uploaded_file:
-            # JSON-Daten einlesen
-            raw_data = json.load(uploaded_file)
+            try:
+                # JSON als Text einlesen und laden
+                stringio = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
+                raw_data = json.load(stringio)
 
-            # Optional: Fehlerbehandlung falls Schlüssel fehlt
-            if "emotions" in raw_data:
-                st.session_state.data = pd.DataFrame(raw_data["emotions"])
-                st.session_state.page = "plot"
-                st.experimental_rerun()
-            else:
-                st.error("Die JSON-Datei enthält keinen 'emotions'-Schlüssel.")
+                if "emotions" in raw_data:
+                    df = pd.DataFrame(raw_data["emotions"])
+                    st.session_state.data = df
+                    st.session_state.page = "plot"
+                    st.experimental_rerun()
+                else:
+                    st.error("Die JSON-Datei enthält keinen 'emotions'-Schlüssel.")
+            except json.JSONDecodeError as e:
+                st.error(f"Fehler beim Lesen der JSON-Datei: {str(e)}")
         else:
             st.error("Bitte lade eine gültige JSON-Datei hoch.")
+
 
 
     #st.divider()
