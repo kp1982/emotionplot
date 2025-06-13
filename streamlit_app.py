@@ -12,17 +12,43 @@ import plotly.colors
 from stacked_bar_plot import plot_stacked_emotions
 
 
-# Page 1 - Initialize session state
+# Initialize page state
+if "page" not in st.session_state:
+    st.session_state.page = "start"
+if "input_type" not in st.session_state:
+    st.session_state.input_type = None
+
+
+plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
+
+
+# Page 0 – Auswahl der Textart
+if st.session_state.page == "start":
+    st.title("Emotionplot – Welcome!")
+    st.write("What type of text would you like to analyze?")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("📖 My input is a novel"):
+            st.session_state.input_type = "novel"
+            st.session_state.page = "novel_input"
+            st.rerun()
+    with col2:
+        if st.button("📝 My input is a poem"):
+            st.session_state.input_type = "poem"
+            st.session_state.page = "poem_input"
+            st.rerun()
+
+# Page 1 – Novel Input
 if "page" not in st.session_state:
     st.session_state.page = "input"
 if "confirm_clicked" not in st.session_state:
     st.session_state.confirm_clicked = False
 
-plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
+# Page 1 – URL novel_input
+if st.session_state.page == "novel_input":
+    st.title("Emotionplot – Step 1: Novel Input")
 
-# Page 1 – URL Input
-if st.session_state.page == "input":
-    st.title("Emotionplot – Step 1")
     # st.write("Please enter the URL:")
 
     url = st.text_input("Enter the URL of the novel/text:")
@@ -40,66 +66,141 @@ if st.session_state.page == "input":
         else:
             st.error("Please enter a valid URL.")
 
-# After confirmation – fetch data and show book info
-if st.session_state.confirm_clicked and "file_data" not in st.session_state:
-    url = st.session_state.url
-
-    # Actual API request
-    status_text = st.empty()
-    progress_bar = st.progress(0)
-
-    with st.spinner("🔄 Analyzing text and extracting emotions..."):
-        try:
-            response = requests.get(
-                "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
-                params={
-                    "url": url,
-                    "sentences_per_chunk": 5,
-                    "model": "accurate",
-                },
-                timeout=900,
-            )
-            response.raise_for_status()
-            data = response.json()
-            st.session_state.file_data = data
-            st.session_state.url = url
-
-            # Update progress bar
-            progress_bar.progress(100)
-            status_text.text("✅ Done!")
-
-
-            # Fetch metadata
+    # ✅ After confirmation – fetch data and show book info
+    if st.session_state.confirm_clicked and url and "file_data" not in st.session_state:
+        # Actual API request
+        with st.spinner("🔄 Analyzing text and extracting emotions..."):
             try:
-                book_id = url.strip("/").split("/")[-1]
-                meta_url = f"https://gutendex.com/books/{book_id}"
-                meta_response = requests.get(meta_url)
-                meta_response.raise_for_status()
-                metadata = meta_response.json()
+                response = requests.get(
+                    "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
+                    params={
+                        "url": url,
+                        "sentences_per_chunk": 5,
+                        "model": "accurate",
+                    },
+                    timeout=900,
+                )
+                response.raise_for_status()
+                data = response.json()
+                st.session_state.file_data = data
+                st.session_state.url = url
 
-                book_title = metadata.get("title", "Unknown Title")
-                authors = metadata.get("authors", [])
-                author_name = authors[0]["name"] if authors else "Unknown Author"
-                cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
-
-                #st.success("✅ API data loaded successfully!")
-                st.write(f"📖 {book_title}")
-                st.write(f"✍️ {author_name}")
-                st.image(cover_url, width=150)
-
-            except Exception:
+                # Update progress bar
+                progress_bar = st.progress(100)
+                status_text = st.empty()
                 status_text.text("✅ Done!")
 
-        except requests.exceptions.RequestException as e:
-            st.error(f"❌ API request failed: {e}")
 
-# Show "Go to plots" only after successful API response
-if st.session_state.page == "input" and "file_data" in st.session_state:
-    if st.button("Go to plots"):
-        st.session_state.page = "plot"
-        st.rerun()
+                # Fetch metadata
+                try:
+                    book_id = url.strip("/").split("/")[-1]
+                    meta_url = f"https://gutendex.com/books/{book_id}"
+                    meta_response = requests.get(meta_url)
+                    meta_response.raise_for_status()
+                    metadata = meta_response.json()
 
-# Page 2 – Plot Output
+                    book_title = metadata.get("title", "Unknown Title")
+                    authors = metadata.get("authors", [])
+                    author_name = authors[0]["name"] if authors else "Unknown Author"
+                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+
+                    #st.success("✅ API data loaded successfully!")
+                    st.write(f"📖 {book_title}")
+                    st.write(f"✍️ {author_name}")
+                    st.image(cover_url, width=150)
+
+                except Exception:
+                    status_text.text("✅ Done!")
+
+            except requests.exceptions.RequestException as e:
+                st.error(f"❌ API request failed: {e}")
+
+    # Next button
+    if "file_data" in st.session_state:
+        if st.button("Go to plots"):
+            st.session_state.page = "plot"
+            st.rerun()
+            #else:
+            #   st.error("Please confirm a valid URL before continuing.")
+
+# Page 2 – Poem Input
+if st.session_state.page == "poem_input":
+    st.title("Emotionplot – Step 1: Poem Input")
+    # st.write("Please enter the URL:")
+
+    url = st.text_input("Enter the URL of the novel/text:")
+
+    # Show funny GIF only before confirm
+    if not st.session_state.confirm_clicked:
+        st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+
+    # Handle Confirm button
+    if st.button("Confirm"):
+        if url:
+            st.session_state.confirm_clicked = True
+            st.session_state.url = url
+            st.rerun()
+        else:
+            st.error("Please enter a valid URL.")
+
+    # ✅ After confirmation – fetch data and show book info
+    if st.session_state.confirm_clicked and url and "file_data" not in st.session_state:
+        # Actual API request
+        with st.spinner("🔄 Analyzing text and extracting emotions..."):
+            try:
+                response = requests.get(
+                    "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
+                    params={
+                        "url": url,
+                        "sentences_per_chunk": 1,
+                        "model": "accurate",
+                    },
+                    timeout=900,
+                )
+                response.raise_for_status()
+                data = response.json()
+                st.session_state.file_data = data
+                st.session_state.url = url
+
+                # Update progress bar
+                progress_bar = st.progress(100)
+                status_text = st.empty()
+                status_text.text("✅ Done!")
+
+                # Fetch metadata
+                try:
+                    book_id = url.strip("/").split("/")[-1]
+                    meta_url = f"https://gutendex.com/books/{book_id}"
+                    meta_response = requests.get(meta_url)
+                    meta_response.raise_for_status()
+                    metadata = meta_response.json()
+
+                    book_title = metadata.get("title", "Unknown Title")
+                    authors = metadata.get("authors", [])
+                    author_name = authors[0]["name"] if authors else "Unknown Author"
+                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+
+                    #st.success("✅ API data loaded successfully!")
+                    st.write(f"📖 {book_title}")
+                    st.write(f"✍️ {author_name}")
+                    st.image(cover_url, width=150)
+
+                except Exception:
+                    status_text.text("✅ Done!")
+
+            except requests.exceptions.RequestException as e:
+                st.error(f"❌ API request failed: {e}")
+
+    # Next button
+    if "file_data" in st.session_state:
+        if st.button("Go to plots"):
+            st.session_state.page = "plot"
+            st.rerun()
+            #else:
+            #   st.error("Please confirm a valid URL before continuing.")
+
+
+# Page 3 – Plot Output
 elif st.session_state.page == "plot":
     st.title("Emotionplot – Step 2")
 
@@ -107,21 +208,28 @@ elif st.session_state.page == "plot":
         file_data = st.session_state.file_data  #Load saved data from session state
 
         if st.session_state.get("url"):
-            # st.write(f"Data loaded from URL: {st.session_state.url}")
-            # Show book cover and book information for Gutenberg book
-            book_id = st.session_state.url.strip("/").split("/")[-1]
-            meta_url = f"https://gutendex.com/books/{book_id}"
-            response = requests.get(meta_url)
-            response.raise_for_status()
-            metadata = response.json()
-            book_title = metadata.get("title", "Unknown Title")
-            authors = metadata.get("authors", [])
-            author_name = authors[0]["name"] if authors else "Unknown Author"
-            #cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+            url = st.session_state.url
+            # Only fetch Gutenberg metadata if URL is from gutenberg.org
+            if "gutenberg.org" in url:
+                try:
+                    book_id = url.strip("/").split("/")[-1]
+                    meta_url = f"https://gutendex.com/books/{book_id}"
+                    response = requests.get(meta_url)
+                    response.raise_for_status()
+                    metadata = response.json()
+                    book_title = metadata.get("title", "Unknown Title")
+                    authors = metadata.get("authors", [])
+                    author_name = authors[0]["name"] if authors else "Unknown Author"
+                    #cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
 
-            st.write(f"📖 {book_title}")
-            st.write(f"✍️ {author_name}")
-            #st.image(cover_url, width=200)
+                    st.write(f"📖 {book_title}")
+                    st.write(f"✍️ {author_name}")
+                    #st.image(cover_url, width=200)
+                except Exception:
+                    st.write("📖 Unknown Title")
+                    st.write("✍️ Unknown Author")
+            else:
+                st.write("📖 Poem or non-Gutenberg text")
 
 
         #with st.expander("Show JSON Preview"):
