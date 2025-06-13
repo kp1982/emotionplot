@@ -1,5 +1,6 @@
-streamlit
-pandas
-plotly
-wordcloud
-matplotlib.pyplot
+streamlit>=1.32
+pandas>=1.5
+requests>=2.25
+plotly>=5.0
+wordcloud>=1.8
+matplotlib>=3.5
