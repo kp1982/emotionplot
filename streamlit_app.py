@@ -103,10 +103,15 @@ if st.button("Confirm"):
             response.raise_for_status()
             data = response.json()
 
+            # Store response in session state
+            st.session_state.file_data = data
+            st.session_state.url = url
+            st.success("Data fetched from URL successfully!")
+
             # --- Create DataFrame from emotions ---
-            df = pd.DataFrame(data["emotions"])
-            top_emotions_df = df["Top_3_Emotions"].apply(pd.Series)
-            top_emotions_df["chunk_index"] = df.index
+            # df = pd.DataFrame(data["emotions"])
+            # top_emotions_df = df["Top_3_Emotions"].apply(pd.Series)
+            # top_emotions_df["chunk_index"] = df.index
 
         except requests.exceptions.RequestException as e:
             st.error(f"API request failed: {e}")
@@ -123,8 +128,7 @@ if st.button("Confirm"):
 
     if uploaded_file is not None:
         try:
-            # file_data = json.load(uploaded_file)
-            file_data = data
+            file_data = json.load(uploaded_file)
             st.session_state.file_data = file_data
             st.session_state.url = None  # Clear URL if a file is uploaded
             st.success("JSON file uploaded successfully!")
@@ -133,12 +137,7 @@ if st.button("Confirm"):
             st.error(f"Invalid JSON file: {json_error}")
 
     if st.button("Next"):
-        if uploaded_file and file_data is not None:
-            st.session_state.page = "plot"
-            st.rerun()
-        elif url:
-            st.session_state.url = url
-            st.session_state.file_data = None  # Clear file data if a URL is entered
+        if st.session_state.get("file_data") is not None:
             st.session_state.page = "plot"
             st.rerun()
         else:
@@ -155,14 +154,15 @@ elif st.session_state.page == "plot":
     st.title("Emotionplot – Step 2")
     data_source = None
 
-    if st.session_state.get("url"):
-        st.write(f"🔗 URL: {st.session_state.url}")
-        st.warning("Loading data from a URL is not implemented in this example.")
-    elif st.session_state.get("file_data") is not None:
-        st.write("📄 JSON file uploaded and loaded.")
-        # Optionally show part of the JSON:
+    if st.session_state.get("file_data") is not None:
+        if st.session_state.get("url"):
+            st.write(f"Data loaded from URL: {st.session_state.url}")
+        else:
+            st.write("JSON file uploaded and loaded.")
+
         with st.expander("Show JSON Preview"):
             st.json(st.session_state.file_data)
+
         data_source = st.session_state.file_data
     else:
         st.error("No data source found. Please go back and enter a URL or upload a JSON file.")
