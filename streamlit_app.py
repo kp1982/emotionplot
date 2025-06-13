@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import plotly.graph_objects as go
 import pandas as pd
+import requests
 
 
 
@@ -81,7 +82,40 @@ if st.session_state.page == "input":
     st.title("Emotionplot – Step 1")
     st.write("Please enter the URL **or** upload a JSON file:")
 
-    url = st.text_input("Enter URL")
+### start of new code ####
+
+url = st.text_input("Enter the URL of the novel/text:")
+
+if st.button("Confirm"):
+    if url:
+        params = {
+            "url": url,
+            "sentences_per_chunk": 3,
+            "model": "accurate",
+        }
+
+        try:
+            response = requests.get(
+                "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
+                params=params,
+                timeout=900,
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            # --- Create DataFrame from emotions ---
+            df = pd.DataFrame(data["emotions"])
+            top_emotions_df = df["Top_3_Emotions"].apply(pd.Series)
+            top_emotions_df["chunk_index"] = df.index
+
+        except requests.exceptions.RequestException as e:
+            st.error(f"API request failed: {e}")
+    else:
+        st.warning("Please enter a valid URL.")
+
+### end of new code ####
+
+    # url = st.text_input("Enter URL")
     uploaded_file = st.file_uploader("Or upload a JSON file", type="json")
 
     file_data = None
@@ -89,7 +123,8 @@ if st.session_state.page == "input":
 
     if uploaded_file is not None:
         try:
-            file_data = json.load(uploaded_file)
+            # file_data = json.load(uploaded_file)
+            file_data = data
             st.session_state.file_data = file_data
             st.session_state.url = None  # Clear URL if a file is uploaded
             st.success("JSON file uploaded successfully!")
