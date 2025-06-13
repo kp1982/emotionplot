@@ -3,6 +3,8 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 
+
+
 # Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "input"
@@ -113,7 +115,6 @@ if st.session_state.page == "input":
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
 
 
-
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
     st.title("Emotionplot – Step 2")
@@ -121,9 +122,7 @@ elif st.session_state.page == "plot":
 
     if st.session_state.get("url"):
         st.write(f"🔗 URL: {st.session_state.url}")
-
         st.warning("Loading data from a URL is not implemented in this example.")
-
     elif st.session_state.get("file_data") is not None:
         st.write("📄 JSON file uploaded and loaded.")
         # Optionally show part of the JSON:
@@ -153,7 +152,6 @@ elif st.session_state.page == "plot":
             key="template_interactive"
         )
         if data_source is not None:
-
             try:
                 # --- ADAPTED DATAFRAME CREATION ---
                 df1 = pd.DataFrame(data_source)  # Step 1: Convert JSON to DataFrame
@@ -176,6 +174,8 @@ elif st.session_state.page == "plot":
                 st.error(f"Error while plotting: {e}")
         else:
             st.info("Please upload a JSON file to see the plot.")
+
+
 
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
