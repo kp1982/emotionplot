@@ -379,19 +379,18 @@ if st.session_state.page == "input":
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
     st.title("Emotionplot – Step 2")
-    file_data = None
 
     if st.session_state.get("file_data") is not None:
+        file_data = st.session_state.file_data  #Load saved data from session state
+
         if st.session_state.get("url"):
             st.write(f"Data loaded from URL: {st.session_state.url}")
-    # elif st.session_state.get("file_data") is not None:
-    #     st.write("📄 JSON file uploaded and loaded.")
-    #     # Optionally show part of the JSON:
-    #     with st.expander("Show JSON Preview"):
-    #         st.json(st.session_state.file_data)
-    #     data_source = st.session_state.file_data
+
+        with st.expander("Show JSON Preview"):
+            st.json(file_data)
     else:
-        st.error("No data source found. Please go back and enter a URL or upload a JSON file.")
+        st.error("No data source found. Please go back and enter a URL.")
+
 
     # Plot selection menu
     st.subheader("📋 Select Plot Type")
@@ -439,25 +438,49 @@ elif st.session_state.page == "plot":
 
 
     # === Wordcloud ===
-    elif selected_plot == "Wordcloud":
-        st.subheader("☁️ Wordcloud")
+elif selected_plot == "Wordcloud":
+    st.subheader("☁️ Wordcloud")
 
-        max_words = st.slider(
-            "Number of words in the Wordcloud:",
-            min_value=10,
-            max_value=200,
-            value=100,
-            step=10,
-            key="max_words_wc"
-        )
-        background_color = st.selectbox(
-            "Background color:",
-            ["white", "black"],
-            key="bg_wc"
-        )
+    max_words = st.slider(
+        "Number of words in the Wordcloud:",
+        min_value=10,
+        max_value=200,
+        value=100,
+        step=10,
+        key="max_words_wc"
+    )
+    background_color = st.selectbox(
+        "Background color:",
+        ["white", "black"],
+        key="bg_wc"
+    )
 
-        st.write(f"Max words: {max_words}, Background color: {background_color}")
-        st.write("➡️ This is where the word cloud would be displayed.")
+    if file_data is not None:
+        try:
+            # Step 1: Extract the list of emotion entries
+            emotions_list = file_data.get("emotions", [])
+
+            # Step 2: Combine all 'chunk' texts into one string
+            all_text = " ".join(entry.get("chunk", "") for entry in emotions_list)
+
+            # Step 3: Generate and display wordcloud
+            wordcloud = WordCloud(
+                width=800,
+                height=400,
+                background_color=background_color,
+                max_words=max_words
+            ).generate(all_text)
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.imshow(wordcloud, interpolation='bilinear')
+            ax.axis("off")
+            st.pyplot(fig)
+
+        except Exception as e:
+            st.error(f"Error generating word cloud: {e}")
+    else:
+        st.info("Please load data to see the word cloud.")
+
 
     # === Barplot ===
     elif selected_plot == "Barplot":
