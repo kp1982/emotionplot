@@ -8,80 +8,20 @@ import matplotlib.pyplot as plt
 import re
 from collections import Counter
 import time
+import plotly.colors
+from stacked_bar_plot import plot_stacked_emotions
+
 
 
 # Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "input"
 
-# Available templates and plot types
-templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
+
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
 
-#### put a maximus of chunks/groups so it doesnt go into negative
 
-def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
-    """
-    Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
-    """
-    # Select emotions to plot
-    emotions_to_plot = [
-        col for col in emotions_df.columns
-        if col not in ["chunk", "text"] and not (exclude_neutral and col.lower() == "neutral")
-    ]
-
-    # Group emotion scores
-    grouped = emotions_df[emotions_to_plot].groupby(emotions_df.index // group_size).sum()
-    grouped["chunk"] = emotions_df["chunk"].groupby(emotions_df.index // group_size).first()
-
-    # Custom emotion order (adjust to your data)
-    custom_order = [
-        "anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness",
-        "love", "gratitude", "pride", "relief", "amusement", "admiration", "approval",
-        "excitement", "optimism", "caring", "desire", "realization", "confusion",
-        "nervousness", "embarrassment", "annoyance", "disappointment", "remorse",
-        "disgust", "grief", "neutral"
-    ]
-    default_visible = set(["anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"])
-
-    fig = go.Figure()
-    for emotion in custom_order:
-        if emotion in grouped.columns:
-            fig.add_trace(
-                go.Scatter(
-                    x=grouped.index,
-                    y=grouped[emotion],
-                    mode='lines',
-                    name=emotion,
-                    customdata=grouped["chunk"],
-                    hovertemplate=(
-                        "<b>Chunk Index:</b> %{x}<br>" +
-                        "<b>Emotion:</b> %{fullData.name}<br>" +
-                        "<b>Emotion Score:</b> %{y:.2f}<br>" +
-                        "<b>Text:</b> %{customdata}<extra></extra>"
-                    ),
-                    visible=True if emotion in default_visible else "legendonly"
-                )
-            )
-
-    fig.update_layout(
-        title="Stacked Emotion Scores per Chunk",
-        xaxis=dict(
-            title="Chunk Index",
-            rangeslider=dict(visible=True),
-            type="linear"
-        ),
-        yaxis=dict(
-            title="Emotion Score"
-        ),
-        height=600,
-        legend_title="Emotion",
-        dragmode="pan",
-        template=template_selected
-    )
-
-    st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": True})
 
 # Page 1 - Initialize session state
 if "page" not in st.session_state:
@@ -207,36 +147,74 @@ elif st.session_state.page == "plot":
     st.divider()
 
     # === Interactive Plot ===
+
+    # Available templates and plot types
+    templates = ["plotly_dark",  "simple_white"] #"plotly_white",
+
+    # Add this list of color scales (Plotly built-ins)
+    color_scales = [
+        "Plotly", "Viridis", "Plasma", "Inferno", "Jet", "Rainbow", "RdBu","Portland"
+    ]
+
+
     if selected_plot == "Interactive Plot":
         st.subheader("📊 Interactive Plot")
         chunks_interactive = st.number_input(
-            "How many sentences should be grouped? (Interactive Plot)",
+            "How many groups of 5 sentences do you want to be displayed? (Interactive Plot)",
             min_value=1,
+            max_value=100,
+            value=10,
             step=1,
             key="chunks_interactive"
         )
-        template_interactive = st.selectbox(
+        # Map user-friendly names to Plotly templates
+        template_options = {
+            "Dark Mode": "plotly_dark",
+            "White Mode": "simple_white"
+        }
+        template_interactive_label = st.selectbox(
             "Choose a plot template:",
-            options=templates,
+            options=list(template_options.keys()),
             key="template_interactive"
         )
+        template_interactive = template_options[template_interactive_label]
+        # Map user-friendly names to Plotly color scales
+        color_scale_options = {
+            "Vibrant": "Plotly",
+            "Cool": "Viridis",
+            "Warm": "Plasma",
+            "Dark": "Inferno",
+            "Classic": "Jet",
+            "Rainbow": "Rainbow",
+            "Red-Blue": "RdBu",
+            "Portland": "Portland"
+        }
+        color_scale_label = st.selectbox(
+            "Choose a color scale:",
+            options=list(color_scale_options.keys()),
+            key="color_scale_interactive"
+        )
+        color_scale_interactive = color_scale_options[color_scale_label]
+
         if file_data is not None:
             try:
                 # --- ADAPTED DATAFRAME CREATION ---
-                df1 = pd.DataFrame(file_data)  # Step 1: Convert JSON to DataFrame
-                df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())   # Step 2: Extract 'emotions' column and expand to DataFrame
-                emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)   # Step 3: Expand 'Top_3_Emotions' column into separate columns
-                emotions_df["chunk"] = emotions_df.index  # Convert index to a column called 'chunk'
+                df1 = pd.DataFrame(file_data)
+                df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())
+                emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)
+                emotions_df["chunk"] = emotions_df.index
 
                 plot_stacked_emotions(
                     emotions_df,
                     group_size=chunks_interactive,
-                    template_selected=template_interactive
+                    template_selected=template_interactive,
+                    color_scale=color_scale_interactive
                 )
             except Exception as e:
                 st.error(f"Error while plotting: {e}")
         else:
             st.info("Please upload a JSON file to see the plot.")
+
 
 
 
