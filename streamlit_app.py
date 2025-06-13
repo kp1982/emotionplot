@@ -11,6 +11,7 @@ if "page" not in st.session_state:
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
+
 def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
     """
     Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
@@ -106,8 +107,12 @@ if st.session_state.page == "input":
         else:
             st.error("Please enter a valid URL or upload a JSON file.")
 
+  #  file_data.to_csv("file_data.csv", index=False)
+
     # Display a funny looping GIF
     st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+
+
 
 # Page 2 – Plot Output
 elif st.session_state.page == "plot":
@@ -116,7 +121,9 @@ elif st.session_state.page == "plot":
 
     if st.session_state.get("url"):
         st.write(f"🔗 URL: {st.session_state.url}")
-        st.warning("Laden von Daten aus einer URL ist in diesem Beispiel nicht implementiert.")
+
+        st.warning("Loading data from a URL is not implemented in this example.")
+
     elif st.session_state.get("file_data") is not None:
         st.write("📄 JSON file uploaded and loaded.")
         # Optionally show part of the JSON:
@@ -146,17 +153,22 @@ elif st.session_state.page == "plot":
             key="template_interactive"
         )
         if data_source is not None:
-            # Try to convert JSON data to DataFrame
+
             try:
-                if isinstance(data_source, dict):
-                    df = pd.DataFrame(data_source)
-                else:  # likely a list of dicts
-                    df = pd.DataFrame(data_source)
-                # Try to ensure there is a "chunk" column
-                if "chunk" not in df.columns:
-                    df["chunk"] = df.index.astype(str)
+                # --- ADAPTED DATAFRAME CREATION ---
+                df1 = pd.DataFrame(data_source)  # Step 1: Convert JSON to DataFrame
+                df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())   # Step 2: Extract 'emotions' column and expand to DataFrame
+                emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)   # Step 3: Expand 'Top_3_Emotions' column into separate columns
+                emotions_df["chunk"] = emotions_df.index  # Convert index to a column called 'chunk'
+            # Optionally, add chunk/text columns if needed for plotting
+                # if "chunk" in df1.columns:
+                #     emotions_df["chunk"] = df1["chunk"]
+                # if "text" in df1.columns:
+                #     emotions_df["text"] = df1["text"]
+                # --- END ADAPTED SECTION ---
+
                 plot_stacked_emotions(
-                    df,
+                    emotions_df,
                     group_size=chunks_interactive,
                     template_selected=template_interactive
                 )
