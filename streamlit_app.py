@@ -12,7 +12,6 @@ import plotly.colors
 from stacked_bar_plot import plot_stacked_emotions
 
 
-
 # Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "start"
@@ -41,8 +40,6 @@ if st.session_state.page == "start":
             st.rerun()
 
 # Page 1 – Novel Input
-
-# Page 1 - Initialize session state
 if "page" not in st.session_state:
     st.session_state.page = "input"
 if "confirm_clicked" not in st.session_state:
@@ -51,6 +48,7 @@ if "confirm_clicked" not in st.session_state:
 # Page 1 – URL novel_input
 if st.session_state.page == "novel_input":
     st.title("Emotionplot – Step 1: Novel Input")
+
     # st.write("Please enter the URL:")
 
     url = st.text_input("Enter the URL of the novel/text:")
@@ -91,6 +89,7 @@ if st.session_state.page == "novel_input":
                 progress_bar = st.progress(100)
                 status_text = st.empty()
                 status_text.text("✅ Done!")
+
 
                 # Fetch metadata
                 try:
@@ -319,14 +318,14 @@ elif st.session_state.page == "plot":
     elif selected_plot == "Wordcloud":
         st.subheader("☁️ Wordcloud")
 
-        max_words = st.slider(
-            "Number of words in the Wordcloud:",
-            min_value=10,
-            max_value=200,
-            value=100,
-            step=10,
-            key="max_words_wc"
-        )
+        #max_words = st.slider(
+        #    "Number of words in the Wordcloud:",
+        #    #min_value=100,
+        #    #max_value=000,
+        #    value=100,
+        #    step=10,
+        #    key="max_words_wc"
+        #)
         background_color = st.selectbox(
             "Background color:",
             ["white", "black"],
@@ -338,40 +337,60 @@ elif st.session_state.page == "plot":
                 # Step 1: Extract the list of emotion entries
                 emotions_list = file_data.get("emotions", [])
 
-                # Step 2: Combine all 'chunk' texts into one string
+                # 🔍 Get list of all unique dominant emotions
+                available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
+
+                # Select emotion to filter by
+                selected_emotion = st.selectbox("Filter wordcloud by dominant emotion:", ["All"] + available_emotions)
+
+                # Step 2: Filter entries
+                if selected_emotion != "All":
+                    emotions_list = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
+
+                # Step 3: Combine all 'chunk' texts into one string
                 all_text = " ".join(entry.get("chunk", "") for entry in emotions_list)
 
-                # Step 3 (alt): Tokenize and count word frequencies
-                words = re.findall(r"\b[a-z]{3,}\b", all_text)  # filter to words of 3+ letters
+                # Step 4: Tokenize and count word frequencies
+                stopwords =  ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as",
+                              "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot",
+                              "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each",
+                              "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd",
+                              "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i",
+                              "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me",
+                              "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other",
+                              "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's",
+                              "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them",
+                              "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this",
+                              "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "we'd", "we'll",
+                              "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while",
+                              "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll",
+                              "you're", "you've", "your", "yours", "yourself", "yourselves"]
+
+                words = re.findall(r"\b[a-z]{3,}\b", all_text.lower())
+                words = [w for w in words if w not in stopwords]
+
                 freq_dict = Counter(words)
 
-                # Step 4 (alt): Generate from frequencies
-                wordcloud = WordCloud(
-                    width=800,
-                    height=400,
-                    background_color=background_color,
-                    max_words=max_words
-                ).generate_from_frequencies(freq_dict)
+                if not freq_dict:
+                    st.warning("No words found for the selected emotion.")
+                else:
+                    # Step 5: Generate and display wordcloud
+                    wordcloud = WordCloud(
+                        width=800,
+                        height=400,
+                        background_color=background_color,
+                        max_words=100
+                    ).generate_from_frequencies(freq_dict)
 
-                # Step 3: Generate and display wordcloud
-                #wordcloud = WordCloud(
-                #    width=800,
-                #    height=400,
-                #    background_color=background_color,
-                #    max_words=max_words
-                #).generate(all_text)
-
-                fig, ax = plt.subplots(figsize=(10, 5))
-                ax.imshow(wordcloud, interpolation='bilinear')
-                ax.axis("off")
-                st.pyplot(fig)
+                    fig, ax = plt.subplots(figsize=(10, 5))
+                    ax.imshow(wordcloud, interpolation='bilinear')
+                    ax.axis("off")
+                    st.pyplot(fig)
 
             except Exception as e:
                 st.error(f"Error generating word cloud: {e}")
-        else:
-            st.info("Please load data to see the word cloud.")
-
-
+    else:
+        st.info("Please load data to see the word cloud.")
 
     # === Barplot ===
 # elif selected_plot == "Barplot":
