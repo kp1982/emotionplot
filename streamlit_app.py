@@ -17,7 +17,6 @@ plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
 
 
 
-
 # Page 1 – URL or JSON Input
 if st.session_state.page == "input":
     st.title("Emotionplot – Step 1")
