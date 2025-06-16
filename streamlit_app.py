@@ -26,8 +26,8 @@ if "input_type" not in st.session_state:
 
 
 # Available templates and plot types
-# templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
-plot_types = ["Interactive Plot", "Wordcloud", "Barplot", "Curve"]
+plot_types = ["Interactive Plot", "Wordcloud", "Barplot", "Curve", "Emotion Examples"]
+
 
 
 # Page 0 – Selection of text type
@@ -139,7 +139,7 @@ if st.session_state.page == "novel_input":
             st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
             st.rerun()
 
-        ## could be commented out....
+        ## additional button to start over
         # if st.button("🔄 Start Over"):
         #     for key in ["file_data", "emotions", "recommend_clicked", "recommendations"]:
         #         st.session_state.pop(key, None)
@@ -246,7 +246,6 @@ elif st.session_state.page == "plot":
     st.title("📊 Step 2: Explore the Emotions")
     st.write("Choose a visualization below to see how emotions unfold in your text.")
 
-#### start of new code
     # 👉 Show sidebar menu only if file_data is present
     if st.session_state.get("file_data") is not None:
         with st.sidebar:
@@ -255,7 +254,6 @@ elif st.session_state.page == "plot":
 
     else:
         st.error("No data source found. Please go back and enter a URL.")
-#### End of new code
 
     if st.session_state.get("file_data") is not None:
         file_data = st.session_state.file_data  #Load saved data from session state
@@ -287,10 +285,14 @@ elif st.session_state.page == "plot":
     else:
         st.error("No data source found. Please go back and enter a URL.")
 
+
+
+
     # Plot selection menu
-    st.subheader("📋 Select Plot Type")
+    st.subheader("📋 Select Output Type")
     selected_plot = st.radio("Choose a plot:", options=plot_types, horizontal=True)
     st.divider()
+
 
     # === Interactive Plot ===
 
@@ -344,6 +346,13 @@ elif st.session_state.page == "plot":
                 key="color_scale_interactive"
             )
             color_scale_interactive = color_scale_options[color_scale_label]
+
+            st.subheader("Want to get book reccomendations?")
+            #st.markdown("Click below to return to start.")
+            if st.button("📚 Get Similar Books"):
+                st.session_state.page = "recommend_books"
+                st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
+                st.rerun()
 
             st.subheader("🚀 Ready to explore another text?")
             st.markdown("Click below to return to start.")
@@ -460,17 +469,28 @@ elif st.session_state.page == "plot":
 
 
         with st.sidebar:
+
+            st.subheader("Want to get book reccomendations?")
+            #st.markdown("Click below to return to start.")
+            if st.button("📚 Get Similar Books"):
+                st.session_state.page = "recommend_books"
+                st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
+                st.rerun()
+
             st.subheader("🚀 Ready to explore another text?")
             st.markdown("Click below to return to start.")
             if st.button("🔁 Start Over"):
                 st.session_state.clear()
                 st.rerun()
+
+
+
     # === Emotions  Barplot ===
 
     elif selected_plot == "Barplot":
         st.subheader("📶 Emotion Frequency")
 
-# new code for sidebar settings
+
         with st.sidebar:
             st.subheader("### Emotion Frequency Settings")
             # Let user pick a bar color
@@ -480,16 +500,20 @@ elif st.session_state.page == "plot":
                 key="bar_color_emotion_freq"
             )
 
+            st.subheader("Want to get book reccomendations?")
+            #st.markdown("Click below to return to start.")
+            if st.button("📚 Get Similar Books"):
+                st.session_state.page = "recommend_books"
+                st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
+                st.rerun()
+
             st.subheader("🚀 Ready to explore another text?")
             st.markdown("Click below to return to start.")
             if st.button("🔁 Start Over"):
                 st.session_state.clear()
                 st.rerun()
-# new code ends here
 
         df1 = pd.DataFrame(st.session_state.file_data)
-        #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
-
         st.subheader("Most Dominant Emotions")
         plot_emotion_frequency(df1, bar_color=bar_color)
 
@@ -502,7 +526,6 @@ elif st.session_state.page == "plot":
     elif selected_plot == "Curve":
         st.subheader("📈 Average Emotion Intensity")
 
-# new code for sidebar settings
         # Sidebar settings for color scale
         with st.sidebar:
             st.subheader("📈 Average Emotion Intensity Settings")
@@ -524,15 +547,72 @@ elif st.session_state.page == "plot":
             color_scale_curve = color_scale_options[color_scale_label]
 
 
+            st.subheader("Want to get book reccomendations?")
+            #st.markdown("Click below to return to start.")
+            if st.button("📚 Get Similar Books"):
+                st.session_state.page = "recommend_books"
+                st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
+                st.rerun()
+
             st.subheader("🚀 Ready to explore another text?")
             st.markdown("Click below to return to start.")
             if st.button("🔁 Start Over"):
                 st.session_state.clear()
                 st.rerun()
-# end of new code
 
         df1 = pd.DataFrame(st.session_state.file_data)
-        #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
+        plot_emotion_evolution(df1, color_scale=color_scale_curve)
+
+
+
+    # === Exaple sentences per emotion ===
+
+    elif selected_plot == "Emotion Examples":
+        st.subheader("🔍 Example Sentences by Emotion")
+
+        # Extract emotion data
+        file_data = st.session_state.file_data
+        # file_data["emotions"] is a list of dicts with at least "Predicted_Emotion" and "chunk"
+        emotions_list = file_data.get("emotions", [])
+
+        # Get all unique emotions
+        available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
+
+        with st.sidebar:
+            st.subheader("🔍 Emotion Example Settings")
+            selected_emotion = st.selectbox("Select an emotion:", available_emotions)
+            num_examples = st.slider("Number of example sentences:", min_value=1, max_value=5, value=3, step=1)
+
+        # Filter for selected emotion
+        filtered = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
+
+        # Show max number of available examples for this emotion in the sidebar
+        with st.sidebar:
+            st.info(f"Maximum number of sentences for _{selected_emotion}_ is {len(filtered)}.")
+
+        if not filtered:
+            st.warning("No sentences found for this emotion.")
+        else:
+            st.markdown(f"**Showing {min(num_examples, len(filtered))} example sentences for _{selected_emotion}_:**")
+            for i, entry in enumerate(filtered[:num_examples]):
+                st.markdown(f"> {entry.get('chunk', '').strip()}")
+
+        with st.sidebar:
+            st.subheader("Want to get book reccomendations?")
+            #st.markdown("Click below to return to start.")
+            if st.button("📚 Get Similar Books"):
+            # --- EDIT: set page to 'recommend_books' to show recommendations page ---
+                st.session_state.page = "recommend_books"
+                st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
+                st.rerun()
+
+        with st.sidebar:
+            st.subheader("🚀 Ready to explore another text?")
+            #st.markdown("Click below to return to start.")
+            if st.button("🔁 Start Over"):
+                st.session_state.clear()
+                st.rerun()
+
 
 
 
