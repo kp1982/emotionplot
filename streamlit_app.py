@@ -399,14 +399,14 @@ elif st.session_state.page == "plot":
                 st.error(f"Error generating word cloud: {e}")
         else:
             st.info("Please load data to see the word cloud.")
-        
+
 
     # === Emotions over time Barplot ===
     elif selected_plot == "Barplot":
 
         df1 = pd.DataFrame(st.session_state.file_data)
         #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
-        st.info("Displaying emotion timeline...")
+        st.subheader("Most Dominant Emotions")
         plot_emotion_frequency(df1)
 
     # === Emotion Mean Bar Plot ===
@@ -415,7 +415,5 @@ elif st.session_state.page == "plot":
 
         df1 = pd.DataFrame(st.session_state.file_data)
         #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
-        st.info("Calculating and plotting mean emotion intensities...")
+        st.subheader("Emotions over time")
         plot_emotion_evolution(df1)
-
-

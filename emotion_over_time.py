@@ -64,8 +64,8 @@ def plot_emotion_evolution(df, default_emotion="amusement"):
     ))
 
     fig.update_layout(
-    title="📈 Emotion Evolution Over Time",
-    xaxis_title="Emotional Progression Over Time (Chunks)",
+    title="📈 Emotions Over Time",
+    xaxis_title="Emotions Over Time",
     yaxis_title="Emotion Intensity",
     yaxis=dict(range=[0, 1]),
     template="plotly_white",
