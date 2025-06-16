@@ -47,13 +47,13 @@ def plot_emotion_evolution(df, default_emotion="amusement", color_scale="Plotly"
         ))
 
     fig.update_layout(
-        title="📈 Emotion Evolution Over Time",
-        xaxis_title="Emotional Progression Over Time (Chunks)",
-        yaxis_title="Emotion Intensity",
-        yaxis=dict(range=[0, 1]),
-        template="plotly_white",
-        height=500,
-        legend_title="Click emotions to toggle",
-    )
+
+      title="📈 Emotions Over Time",
+      xaxis_title="Emotions Over Time",
+      yaxis_title="Emotion Intensity",
+      yaxis=dict(range=[0, 1]),
+      template="plotly_white",
+      height=500,
+      legend_title="Click emotions to toggle",   )
 
     st.plotly_chart(fig, use_container_width=True)

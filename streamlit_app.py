@@ -460,8 +460,10 @@ elif st.session_state.page == "plot":
 
         df1 = pd.DataFrame(st.session_state.file_data)
         #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
-        #st.info("Displaying emotion timeline...")
+
+        st.subheader("Most Dominant Emotions")
         plot_emotion_frequency(df1, bar_color=bar_color)
+
 
 
 
@@ -502,5 +504,6 @@ elif st.session_state.page == "plot":
 
         df1 = pd.DataFrame(st.session_state.file_data)
         #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
-        #st.info("Calculating and plotting mean emotion intensities...")
+
+        st.subheader("Emotions over time")
         plot_emotion_evolution(df1, color_scale=color_scale_curve)
