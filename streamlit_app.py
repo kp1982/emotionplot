@@ -30,10 +30,10 @@ if "input_type" not in st.session_state:
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot", "Curve"]
 
 
-# Page 0 – Auswahl der Textart
+# Page 0 – Selection of text type
 if st.session_state.page == "start":
-    st.title("Emotionplot – Welcome!")
-    st.write("What type of text would you like to analyze?")
+    st.title("📚 Welcome to Emotionplot")
+    st.write("Uncover the emotional journey in literature. Choose your type of text to begin:")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -55,7 +55,8 @@ if "confirm_clicked" not in st.session_state:
 
 # Page 1 – URL novel_input
 if st.session_state.page == "novel_input":
-    st.title("Emotionplot – Step 1: Novel Input")
+    st.title("📖 Step 1: Paste Your Novel Link")
+    st.write("Paste a URL from **Project Gutenberg** or another online source. We'll fetch the text and analyze its emotions.")
 
     # st.write("Please enter the URL:")
 
@@ -112,10 +113,13 @@ if st.session_state.page == "novel_input":
                     author_name = authors[0]["name"] if authors else "Unknown Author"
                     cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
 
-                    #st.success("✅ API data loaded successfully!")
-                    st.write(f"📖 {book_title}")
-                    st.write(f"✍️ {author_name}")
-                    st.image(cover_url, width=150)
+                    # Display book info and cover side by side (only once)
+                    info_col, cover_col = st.columns([2, 1])
+                    with info_col:
+                        st.write(f"📖 {book_title}")
+                        st.write(f"✍️ {author_name}")
+                    with cover_col:
+                        st.image(cover_url, width=150)
 
                 except Exception:
                     status_text.text("✅ Done!")
@@ -133,7 +137,8 @@ if st.session_state.page == "novel_input":
 
 # Page 2 – Poem Input
 if st.session_state.page == "poem_input":
-    st.title("Emotionplot – Step 1: Poem Input")
+    st.title("📝 Step 1: Paste Your Poem Link")
+    st.write("Paste a URL to your poem. Ideal for shorter texts with emotional density.")
     # st.write("Please enter the URL:")
 
     url = st.text_input("Enter the URL of the novel/text:")
@@ -210,7 +215,19 @@ if st.session_state.page == "poem_input":
 
 # Page 3 – Plot Output
 elif st.session_state.page == "plot":
-    st.title("Emotionplot – Step 2")
+    st.title("📊 Step 2: Explore the Emotions")
+    st.write("Choose a visualization below to see how emotions unfold in your text.")
+
+#### start of new code
+    # 👉 Show sidebar menu only if file_data is present
+    if st.session_state.get("file_data") is not None:
+        with st.sidebar:
+            st.header("🔧 Settings Menu")
+            #st.markdown("Use the sidebar to navigate or adjust plot settings.")
+
+    else:
+        st.error("No data source found. Please go back and enter a URL.")
+#### End of new code
 
     if st.session_state.get("file_data") is not None:
         file_data = st.session_state.file_data  #Load saved data from session state
@@ -239,9 +256,6 @@ elif st.session_state.page == "plot":
             else:
                 st.write("📖 Poem or non-Gutenberg text")
 
-
-        #with st.expander("Show JSON Preview"):
-        #    st.json(file_data)
     else:
         st.error("No data source found. Please go back and enter a URL.")
 
@@ -262,43 +276,53 @@ elif st.session_state.page == "plot":
 
 
     if selected_plot == "Interactive Plot":
-        st.subheader("📊 Interactive Plot")
-        chunks_interactive = st.number_input(
-            "How many groups of 5 sentences do you want to be displayed? (Interactive Plot)",
-            min_value=1,
-            max_value=100,
-            value=10,
-            step=1,
-            key="chunks_interactive"
-        )
-        # Map user-friendly names to Plotly templates
-        template_options = {
-            "Dark Mode": "plotly_dark",
-            "White Mode": "simple_white"
-        }
-        template_interactive_label = st.selectbox(
-            "Choose a plot template:",
-            options=list(template_options.keys()),
-            key="template_interactive"
-        )
-        template_interactive = template_options[template_interactive_label]
-        # Map user-friendly names to Plotly color scales
-        color_scale_options = {
-            "Vibrant": "Plotly",
-            "Cool": "Viridis",
-            "Warm": "Plasma",
-            "Dark": "Inferno",
-            "Classic": "Jet",
-            "Rainbow": "Rainbow",
-            "Red-Blue": "RdBu",
-            "Portland": "Portland"
-        }
-        color_scale_label = st.selectbox(
-            "Choose a color scale:",
-            options=list(color_scale_options.keys()),
-            key="color_scale_interactive"
-        )
-        color_scale_interactive = color_scale_options[color_scale_label]
+        st.subheader("📊 Emotional Landscape")
+        with st.sidebar:
+            #st.markdown("### Interactive Plot Settings")
+            st.subheader("🎨 Interactive Plot Settings")
+            chunks_interactive = st.number_input(
+                "How many groups of 5 sentences do you want to be displayed?",
+                min_value=1,
+                max_value=100,
+                value=10,
+                step=1,
+                key="chunks_interactive"
+            )
+            # Map user-friendly names to Plotly templates
+            template_options = {
+                "Dark Mode": "plotly_dark",
+                "White Mode": "simple_white"
+            }
+            template_interactive_label = st.selectbox(
+                "Choose a plot template:",
+                options=list(template_options.keys()),
+                key="template_interactive"
+            )
+            template_interactive = template_options[template_interactive_label]
+            # Map user-friendly names to Plotly color scales
+            color_scale_options = {
+                "Vibrant": "Plotly",
+                "Cool": "Viridis",
+                "Warm": "Plasma",
+                "Dark": "Inferno",
+                "Classic": "Jet",
+                "Rainbow": "Rainbow",
+                "Red-Blue": "RdBu",
+                "Portland": "Portland"
+            }
+            color_scale_label = st.selectbox(
+                "Choose a color scale:",
+                options=list(color_scale_options.keys()),
+                key="color_scale_interactive"
+            )
+            color_scale_interactive = color_scale_options[color_scale_label]
+
+            st.subheader("🚀 Ready to explore another text?")
+            st.markdown("Click below to return to start.")
+            if st.button("🔁 Start Over"):
+                st.session_state.clear()
+                st.rerun()
+
 
         if file_data is not None:
             try:
@@ -316,6 +340,8 @@ elif st.session_state.page == "plot":
                 )
             except Exception as e:
                 st.error(f"Error while plotting: {e}")
+
+
         else:
             st.info("Please upload a JSON file to see the plot.")
 
@@ -324,7 +350,7 @@ elif st.session_state.page == "plot":
 
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
-        st.subheader("☁️ Wordcloud")
+        st.subheader("☁️ Emotion Wordcloud")
 
         #max_words = st.slider(
         #    "Number of words in the Wordcloud:",
@@ -334,11 +360,14 @@ elif st.session_state.page == "plot":
         #    step=10,
         #    key="max_words_wc"
         #)
-        background_color = st.selectbox(
+        with st.sidebar:
+            st.subheader("☁️ Wordcloud Settings")
+            background_color = st.selectbox(
             "Background color:",
             ["white", "black"],
             key="bg_wc"
-        )
+            )
+
 
         if file_data is not None:
             try:
@@ -349,7 +378,8 @@ elif st.session_state.page == "plot":
                 available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
 
                 # Select emotion to filter by
-                selected_emotion = st.selectbox("Filter wordcloud by dominant emotion:", ["All"] + available_emotions)
+                with st.sidebar:
+                    selected_emotion = st.selectbox("Filter wordcloud by dominant emotion:", ["All"] + available_emotions)
 
                 # Step 2: Filter entries
                 if selected_emotion != "All":
@@ -400,20 +430,80 @@ elif st.session_state.page == "plot":
         else:
             st.info("Please load data to see the word cloud.")
 
+        with st.sidebar:
+            st.subheader("🚀 Ready to explore another text?")
+            st.markdown("Click below to return to start.")
+            if st.button("🔁 Start Over"):
+                st.session_state.clear()
+                st.rerun()
+    # === Emotions  Barplot ===
 
-    # === Emotions over time Barplot ===
     elif selected_plot == "Barplot":
+        st.subheader("📶 Emotion Frequency")
+
+# new code for sidebar settings
+        with st.sidebar:
+            st.subheader("### Emotion Frequency Settings")
+            # Let user pick a bar color
+            bar_color = st.color_picker(
+                "Pick a bar color:",
+                value="#FFC0CB",  # Default is pink
+                key="bar_color_emotion_freq"
+            )
+
+            st.subheader("🚀 Ready to explore another text?")
+            st.markdown("Click below to return to start.")
+            if st.button("🔁 Start Over"):
+                st.session_state.clear()
+                st.rerun()
+# new code ends here
 
         df1 = pd.DataFrame(st.session_state.file_data)
         #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
-        st.subheader("Most Dominant Emotions")
-        plot_emotion_frequency(df1)
 
-    # === Emotion Mean Bar Plot ===
+        st.subheader("Most Dominant Emotions")
+        plot_emotion_frequency(df1, bar_color=bar_color)
+
+
+
+
+
+    # === Emotion Mean Curve Plot ===
 
     elif selected_plot == "Curve":
+        st.subheader("📈 Average Emotion Intensity")
+
+# new code for sidebar settings
+        # Sidebar settings for color scale
+        with st.sidebar:
+            st.subheader("📈 Average Emotion Intensity Settings")
+            color_scale_options = {
+                "Vibrant": "Plotly",
+                "Cool": "Viridis",
+                "Warm": "Plasma",
+                "Dark": "Inferno",
+                "Classic": "Jet",
+                "Rainbow": "Rainbow",
+                "Red-Blue": "RdBu",
+                "Portland": "Portland"
+            }
+            color_scale_label = st.selectbox(
+                "Choose a color scale:",
+                options=list(color_scale_options.keys()),
+                key="color_scale_curve"
+            )
+            color_scale_curve = color_scale_options[color_scale_label]
+
+
+            st.subheader("🚀 Ready to explore another text?")
+            st.markdown("Click below to return to start.")
+            if st.button("🔁 Start Over"):
+                st.session_state.clear()
+                st.rerun()
+# end of new code
 
         df1 = pd.DataFrame(st.session_state.file_data)
         #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
+
         st.subheader("Emotions over time")
-        plot_emotion_evolution(df1)
+        plot_emotion_evolution(df1, color_scale=color_scale_curve)
