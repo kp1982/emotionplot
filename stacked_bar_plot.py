@@ -22,6 +22,9 @@ def plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False, temp
     grouped = emotions_df[emotions_to_plot].groupby(emotions_df.index // group_size).sum()
     grouped["chunk"] = emotions_df["chunk"].groupby(emotions_df.index // group_size).first()
 
+    # Shift the index so x-axis starts at 1 instead of 0
+    grouped.index = grouped.index + 1
+
     # Custom emotion order (adjust to your data)
     custom_order = [
         "neutral", "grief", "disgust", "remorse", "disappointment", "annoyance",
