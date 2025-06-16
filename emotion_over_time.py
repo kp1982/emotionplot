@@ -15,6 +15,7 @@ def plot_emotion_evolution(df, default_emotion="amusement", color_scale="Plotly"
             })
 
     emotion_df = pd.DataFrame(emotion_records)
+
     unique_emotions = sorted(emotion_df["emotion"].unique())
 
     # Choose color scale from Plotly
@@ -32,7 +33,7 @@ def plot_emotion_evolution(df, default_emotion="amusement", color_scale="Plotly"
     px_colors = color_scale_map.get(color_scale, px.colors.qualitative.Plotly)
     # If not enough colors, repeat
     emotion_colors = {emotion: px_colors[i % len(px_colors)] for i, emotion in enumerate(unique_emotions)}
-
+    emotion_records = [{"chunk": 0, "emotion": "joy", "score": 0.75}]
     fig = go.Figure()
     for emotion in unique_emotions:
         emotion_data = emotion_df[emotion_df["emotion"] == emotion]
@@ -55,5 +56,5 @@ def plot_emotion_evolution(df, default_emotion="amusement", color_scale="Plotly"
       template="plotly_white",
       height=500,
       legend_title="Click emotions to toggle",   )
-
+    st.write("📊 Plotly figure traces count:", len(fig.data))
     st.plotly_chart(fig, use_container_width=True)
