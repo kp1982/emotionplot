@@ -32,30 +32,18 @@ def plot_emotion_frequency(data, bar_color="pink"):    # CHANGE: ADD BAR_COLOR P
                                                                                 #Group and calculate mean
     total_chunks = df.shape[0]
 
-    # Step 4: Group by emotion
+                                                                                #Group by emotion
     grouped = flat_df.groupby("emotion").agg(
         total_score=("value", "sum"),
         appearance_count=("chunk", "nunique")
     )
     grouped = grouped[grouped.index != "neutral"]
 
-    # Step 5: Normalize by total chunks (not just where emotion appeared)
+                                                                                #Normalize by total chunks (not just where emotion appeared)
     grouped["chunk_normalized_score"] = grouped["total_score"] / total_chunks
 
-    # Optional: sort for plotting or display
+                                                                                #sort for plotting or display
     normalized_means = (grouped["chunk_normalized_score"]* 100).sort_values(ascending=False)
-
-    # fig, ax = plt.subplots(figsize=(10, 5))
-    # normalized_means.plot(kind="bar", color=bar_color, edgecolor="black", ax=ax)# CHANGE: ADD BAR_COLOR PARAMETER
-    # ax.set_title("Average Intensity of Emotions Across all Chunks")
-
-    # ax.set_xlabel("Emotion")
-    # ax.set_ylabel("Frequency of each emotion")
-    # plt.xticks(rotation=45, ha='right')
-    # plt.tight_layout()
-    # plt.grid(axis='y', linestyle='--', alpha=0.7)
-
-    # st.pyplot(fig)
 
     fig = px.bar(
     normalized_means.reset_index(),
