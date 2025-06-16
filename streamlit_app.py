@@ -3,7 +3,8 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 import requests
-
+from emotion_frequency import plot_emotion_frequency
+from emotion_over_time import plot_emotion_evolution
 
 
 # Initialize page state
@@ -12,7 +13,7 @@ if "page" not in st.session_state:
 
 # Available templates and plot types
 templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
-plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
+plot_types = ["Interactive Plot", "Wordcloud", "Barplot", "Curve"]
 
 
 #### put a maximus of chunks/groups so it doesnt go into negative
@@ -204,18 +205,38 @@ elif st.session_state.page == "plot":
         st.write("➡️ This is where the word cloud would be displayed.")
 
     # === Barplot ===
+    #elif selected_plot == "Barplot":
+    #    st.subheader("📶 Barplot")
+
+    #    chunks_bar = st.number_input(
+     #       "How many sentences should be grouped? (Barplot)",
+     #       min_value=1,
+     #       step=1,
+     #       key="chunks_bar"
+     #   )
+
+     #   st.write(f"Grouping: {chunks_bar}")
+     #   st.write("➡️ This is where the bar plot would appear.")
+
+    #st.divider()
+
+    # === Emotions over time Barplot ===
     elif selected_plot == "Barplot":
-        st.subheader("📶 Barplot")
 
-        chunks_bar = st.number_input(
-            "How many sentences should be grouped? (Barplot)",
-            min_value=1,
-            step=1,
-            key="chunks_bar"
-        )
+        df1 = pd.DataFrame(st.session_state.file_data)
+        #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
+        st.info("Displaying emotion timeline...")
+        plot_emotion_frequency(df1)
 
-        st.write(f"Grouping: {chunks_bar}")
-        st.write("➡️ This is where the bar plot would appear.")
+    # === Emotion Mean Bar Plot ===
+
+    elif selected_plot == "Curve":
+
+        df1 = pd.DataFrame(st.session_state.file_data)
+        #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
+        st.info("Calculating and plotting mean emotion intensities...")
+        plot_emotion_evolution(df1)
+
 
     st.divider()
 
