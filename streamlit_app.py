@@ -80,7 +80,7 @@ if st.session_state.page == "novel_input":
         with st.spinner("🔄 Analyzing text and extracting emotions..."):
             try:
                 response = requests.get(
-                    "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
+                    "https://emotionplot-api-znpzhhue6a-ew.a.run.app/analyze",
                     params={
                         "url": url,
                         "sentences_per_chunk": 5,
@@ -130,6 +130,31 @@ if st.session_state.page == "novel_input":
             st.rerun()
             #else:
             #   st.error("Please confirm a valid URL before continuing.")
+        # Show Get Similar Books button
+        if st.button("📚 Get Similar Books"):
+            st.session_state.recommend_clicked = True
+            st.rerun()
+        if st.button("🔄 Start Over"):
+            for key in ["file_data", "emotions", "recommend_clicked", "recommendations"]:
+                st.session_state.pop(key, None)
+            st.rerun()
+# Fetch recommendations if requested
+if st.session_state.get("recommend_clicked") and "recommendations" not in st.session_state:
+    with st.spinner("🔎 Finding similar books..."):
+        try:
+            response = requests.post(
+                "https://emotionplot-api-znpzhhue6a-ew.a.run.app/recommend",
+                json=st.session_state.file_data,
+                timeout=60
+            )
+            response.raise_for_status()
+            rec_data = response.json()
+            st.session_state.recommendations = rec_data
+            st.success("✅ Recommendations loaded!")
+        except requests.exceptions.RequestException as e:
+            st.error(f"❌ Failed to get recommendations: {e}")
+    # Prevent re-fetching on every rerun
+    st.session_state.recommend_clicked = False
 
 # Page 2 – Poem Input
 if st.session_state.page == "poem_input":
@@ -157,7 +182,7 @@ if st.session_state.page == "poem_input":
         with st.spinner("🔄 Analyzing text and extracting emotions..."):
             try:
                 response = requests.get(
-                    "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
+                    "https://emotionplot-api-znpzhhue6a-ew.a.run.app/analyze",
                     params={
                         "url": url,
                         "sentences_per_chunk": 1,
@@ -397,9 +422,9 @@ elif st.session_state.page == "plot":
 
             except Exception as e:
                 st.error(f"Error generating word cloud: {e}")
-    else:
-        st.info("Please load data to see the word cloud.")
-        
+        else:
+            st.info("Please load data to see the word cloud.")
+
 
     # === Emotions over time Barplot ===
     elif selected_plot == "Barplot":
@@ -419,3 +444,16 @@ elif st.session_state.page == "plot":
         plot_emotion_evolution(df1)
 
 
+    # ==== Recommendations ===
+    if "recommendations" in st.session_state:
+        st.subheader("📖 Recommended Books")
+
+    for rec in st.session_state.recommendations:
+        url = rec.get("book_url", "https://www.gutenberg.org")
+        book_id = url.strip("/").split("/")[-1]
+        similarity = rec.get("similarity", 0.0)
+
+        st.markdown(f"🔗 **[View Book](https://www.gutenberg.org/ebooks/{book_id})**")
+        st.markdown(f"**Similarity:** {similarity:.3f}")
+        st.image(f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg", width=120)
+        st.divider()
