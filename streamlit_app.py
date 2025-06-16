@@ -3,6 +3,10 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 import requests
+
+from emotion_frequency import plot_emotion_frequency
+from emotion_over_time import plot_emotion_evolution
+
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import re
@@ -12,6 +16,7 @@ import plotly.colors
 from stacked_bar_plot import plot_stacked_emotions
 
 
+
 # Initialize page state
 if "page" not in st.session_state:
     st.session_state.page = "start"
@@ -19,7 +24,10 @@ if "input_type" not in st.session_state:
     st.session_state.input_type = None
 
 
-plot_types = ["Interactive Plot", "Wordcloud", "Barplot"]
+
+# Available templates and plot types
+# templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
+plot_types = ["Interactive Plot", "Wordcloud", "Barplot", "Curve"]
 
 
 # Page 0 – Auswahl der Textart
@@ -391,23 +399,23 @@ elif st.session_state.page == "plot":
                 st.error(f"Error generating word cloud: {e}")
     else:
         st.info("Please load data to see the word cloud.")
+        
 
-    # === Barplot ===
-# elif selected_plot == "Barplot":
-#        st.subheader("📶 Barplot")
+    # === Emotions over time Barplot ===
+    elif selected_plot == "Barplot":
 
-#       chunks_bar = st.number_input(
-#            "How many sentences should be grouped? (Barplot)",
-#           min_value=1,
-#            step=1,
-#            key="chunks_bar"
-#        )
+        df1 = pd.DataFrame(st.session_state.file_data)
+        #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
+        st.info("Displaying emotion timeline...")
+        plot_emotion_frequency(df1)
 
-#        st.write(f"Grouping: {chunks_bar}")
-#        st.write("➡️ This is where the bar plot would appear.")
+    # === Emotion Mean Bar Plot ===
 
-#    st.divider()
+    elif selected_plot == "Curve":
 
-#if st.button("Back"):
-#        st.session_state.page = "input"
-#        st.rerun()
+        df1 = pd.DataFrame(st.session_state.file_data)
+        #df_emotions = pd.DataFrame.from_records(df1["emotions"].to_list())
+        st.info("Calculating and plotting mean emotion intensities...")
+        plot_emotion_evolution(df1)
+
+
