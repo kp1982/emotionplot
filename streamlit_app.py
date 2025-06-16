@@ -3,133 +3,212 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 import requests
+
 from emotion_frequency import plot_emotion_frequency
 from emotion_over_time import plot_emotion_evolution
+
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import re
+from collections import Counter
+import time
+import plotly.colors
+from stacked_bar_plot import plot_stacked_emotions
+
 
 
 # Initialize page state
 if "page" not in st.session_state:
-    st.session_state.page = "input"
+    st.session_state.page = "start"
+if "input_type" not in st.session_state:
+    st.session_state.input_type = None
+
+
 
 # Available templates and plot types
-templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
+# templates = ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white", "none"]
 plot_types = ["Interactive Plot", "Wordcloud", "Barplot", "Curve"]
 
 
-#### put a maximus of chunks/groups so it doesnt go into negative
+# Page 0 – Auswahl der Textart
+if st.session_state.page == "start":
+    st.title("Emotionplot – Welcome!")
+    st.write("What type of text would you like to analyze?")
 
-def plot_stacked_emotions(emotions_df, group_size=5, exclude_neutral=True, template_selected="plotly_white"):
-    """
-    Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
-    """
-    # Select emotions to plot
-    emotions_to_plot = [
-        col for col in emotions_df.columns
-        if col not in ["chunk", "text"] and not (exclude_neutral and col.lower() == "neutral")
-    ]
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("📖 My input is a novel"):
+            st.session_state.input_type = "novel"
+            st.session_state.page = "novel_input"
+            st.rerun()
+    with col2:
+        if st.button("📝 My input is a poem"):
+            st.session_state.input_type = "poem"
+            st.session_state.page = "poem_input"
+            st.rerun()
 
-    # Group emotion scores
-    grouped = emotions_df[emotions_to_plot].groupby(emotions_df.index // group_size).sum()
-    grouped["chunk"] = emotions_df["chunk"].groupby(emotions_df.index // group_size).first()
+# Page 1 – Novel Input
+if "page" not in st.session_state:
+    st.session_state.page = "input"
+if "confirm_clicked" not in st.session_state:
+    st.session_state.confirm_clicked = False
 
-    # Custom emotion order (adjust to your data)
-    custom_order = [
-        "anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness",
-        "love", "gratitude", "pride", "relief", "amusement", "admiration", "approval",
-        "excitement", "optimism", "caring", "desire", "realization", "confusion",
-        "nervousness", "embarrassment", "annoyance", "disappointment", "remorse",
-        "disgust", "grief", "neutral"
-    ]
-    default_visible = set(["anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"])
+# Page 1 – URL novel_input
+if st.session_state.page == "novel_input":
+    st.title("Emotionplot – Step 1: Novel Input")
 
-    fig = go.Figure()
-    for emotion in custom_order:
-        if emotion in grouped.columns:
-            fig.add_trace(
-                go.Scatter(
-                    x=grouped.index,
-                    y=grouped[emotion],
-                    mode='lines',
-                    name=emotion,
-                    customdata=grouped["chunk"],
-                    hovertemplate=(
-                        "<b>Chunk Index:</b> %{x}<br>" +
-                        "<b>Emotion:</b> %{fullData.name}<br>" +
-                        "<b>Emotion Score:</b> %{y:.2f}<br>" +
-                        "<b>Text:</b> %{customdata}<extra></extra>"
-                    ),
-                    visible=True if emotion in default_visible else "legendonly"
-                )
-            )
-
-    fig.update_layout(
-        title="Stacked Emotion Scores per Chunk",
-        xaxis=dict(
-            title="Chunk Index",
-            rangeslider=dict(visible=True),
-            type="linear"
-        ),
-        yaxis=dict(
-            title="Emotion Score"
-        ),
-        height=600,
-        legend_title="Emotion",
-        dragmode="pan",
-        template=template_selected
-    )
-
-    st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": True})
-
-# Page 1 – URL or JSON Input
-if st.session_state.page == "input":
-    st.title("Emotionplot – Step 1")
-    st.write("Please enter the URL:")
+    # st.write("Please enter the URL:")
 
     url = st.text_input("Enter the URL of the novel/text:")
 
+    # Show funny GIF only before confirm
+    if not st.session_state.confirm_clicked:
+        st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+
+    # Handle Confirm button
     if st.button("Confirm"):
         if url:
-            params = {
-                "url": url,
-                "sentences_per_chunk": 5,
-                "model": "accurate",
-            }
-            try:
-                response = requests.get(
-                    "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
-                    params=params,
-                    timeout=900,
-                )
-                response.raise_for_status()
-                data = response.json()
-                # Save API output to session_state
-                st.session_state.file_data = data
-                st.session_state.url = url
-                st.success("API data loaded successfully!")
-            except requests.exceptions.RequestException as e:
-                st.error(f"API request failed: {e}")
-        else:
-            st.error("Please enter a URL before confirming.")
-
-
-### end of new code ####
-
-
-    file_data = None
-
-    if st.button("Next"):
-        if url and st.session_state.get("file_data") is not None:
-            st.session_state.page = "plot"
+            st.session_state.confirm_clicked = True
+            st.session_state.url = url
             st.rerun()
         else:
             st.error("Please enter a valid URL.")
 
+    # ✅ After confirmation – fetch data and show book info
+    if st.session_state.confirm_clicked and url and "file_data" not in st.session_state:
+        # Actual API request
+        with st.spinner("🔄 Analyzing text and extracting emotions..."):
+            try:
+                response = requests.get(
+                    "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
+                    params={
+                        "url": url,
+                        "sentences_per_chunk": 5,
+                        "model": "accurate",
+                    },
+                    timeout=900,
+                )
+                response.raise_for_status()
+                data = response.json()
+                st.session_state.file_data = data
+                st.session_state.url = url
 
-    # Display a funny looping GIF
-    st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+                # Update progress bar
+                progress_bar = st.progress(100)
+                status_text = st.empty()
+                status_text.text("✅ Done!")
 
 
-# Page 2 – Plot Output
+                # Fetch metadata
+                try:
+                    book_id = url.strip("/").split("/")[-1]
+                    meta_url = f"https://gutendex.com/books/{book_id}"
+                    meta_response = requests.get(meta_url)
+                    meta_response.raise_for_status()
+                    metadata = meta_response.json()
+
+                    book_title = metadata.get("title", "Unknown Title")
+                    authors = metadata.get("authors", [])
+                    author_name = authors[0]["name"] if authors else "Unknown Author"
+                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+
+                    #st.success("✅ API data loaded successfully!")
+                    st.write(f"📖 {book_title}")
+                    st.write(f"✍️ {author_name}")
+                    st.image(cover_url, width=150)
+
+                except Exception:
+                    status_text.text("✅ Done!")
+
+            except requests.exceptions.RequestException as e:
+                st.error(f"❌ API request failed: {e}")
+
+    # Next button
+    if "file_data" in st.session_state:
+        if st.button("Go to plots"):
+            st.session_state.page = "plot"
+            st.rerun()
+            #else:
+            #   st.error("Please confirm a valid URL before continuing.")
+
+# Page 2 – Poem Input
+if st.session_state.page == "poem_input":
+    st.title("Emotionplot – Step 1: Poem Input")
+    # st.write("Please enter the URL:")
+
+    url = st.text_input("Enter the URL of the novel/text:")
+
+    # Show funny GIF only before confirm
+    if not st.session_state.confirm_clicked:
+        st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+
+    # Handle Confirm button
+    if st.button("Confirm"):
+        if url:
+            st.session_state.confirm_clicked = True
+            st.session_state.url = url
+            st.rerun()
+        else:
+            st.error("Please enter a valid URL.")
+
+    # ✅ After confirmation – fetch data and show book info
+    if st.session_state.confirm_clicked and url and "file_data" not in st.session_state:
+        # Actual API request
+        with st.spinner("🔄 Analyzing text and extracting emotions..."):
+            try:
+                response = requests.get(
+                    "https://emotionplot2-znpzhhue6a-ew.a.run.app/analyze",
+                    params={
+                        "url": url,
+                        "sentences_per_chunk": 1,
+                        "model": "accurate",
+                    },
+                    timeout=900,
+                )
+                response.raise_for_status()
+                data = response.json()
+                st.session_state.file_data = data
+                st.session_state.url = url
+
+                # Update progress bar
+                progress_bar = st.progress(100)
+                status_text = st.empty()
+                status_text.text("✅ Done!")
+
+                # Fetch metadata
+                try:
+                    book_id = url.strip("/").split("/")[-1]
+                    meta_url = f"https://gutendex.com/books/{book_id}"
+                    meta_response = requests.get(meta_url)
+                    meta_response.raise_for_status()
+                    metadata = meta_response.json()
+
+                    book_title = metadata.get("title", "Unknown Title")
+                    authors = metadata.get("authors", [])
+                    author_name = authors[0]["name"] if authors else "Unknown Author"
+                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+
+                    #st.success("✅ API data loaded successfully!")
+                    st.write(f"📖 {book_title}")
+                    st.write(f"✍️ {author_name}")
+                    st.image(cover_url, width=150)
+
+                except Exception:
+                    status_text.text("✅ Done!")
+
+            except requests.exceptions.RequestException as e:
+                st.error(f"❌ API request failed: {e}")
+
+    # Next button
+    if "file_data" in st.session_state:
+        if st.button("Go to plots"):
+            st.session_state.page = "plot"
+            st.rerun()
+            #else:
+            #   st.error("Please confirm a valid URL before continuing.")
+
+
+# Page 3 – Plot Output
 elif st.session_state.page == "plot":
     st.title("Emotionplot – Step 2")
 
@@ -137,10 +216,32 @@ elif st.session_state.page == "plot":
         file_data = st.session_state.file_data  #Load saved data from session state
 
         if st.session_state.get("url"):
-            st.write(f"Data loaded from URL: {st.session_state.url}")
+            url = st.session_state.url
+            # Only fetch Gutenberg metadata if URL is from gutenberg.org
+            if "gutenberg.org" in url:
+                try:
+                    book_id = url.strip("/").split("/")[-1]
+                    meta_url = f"https://gutendex.com/books/{book_id}"
+                    response = requests.get(meta_url)
+                    response.raise_for_status()
+                    metadata = response.json()
+                    book_title = metadata.get("title", "Unknown Title")
+                    authors = metadata.get("authors", [])
+                    author_name = authors[0]["name"] if authors else "Unknown Author"
+                    #cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
 
-        with st.expander("Show JSON Preview"):
-            st.json(file_data)
+                    st.write(f"📖 {book_title}")
+                    st.write(f"✍️ {author_name}")
+                    #st.image(cover_url, width=200)
+                except Exception:
+                    st.write("📖 Unknown Title")
+                    st.write("✍️ Unknown Author")
+            else:
+                st.write("📖 Poem or non-Gutenberg text")
+
+
+        #with st.expander("Show JSON Preview"):
+        #    st.json(file_data)
     else:
         st.error("No data source found. Please go back and enter a URL.")
 
@@ -150,31 +251,68 @@ elif st.session_state.page == "plot":
     st.divider()
 
     # === Interactive Plot ===
+
+    # Available templates and plot types
+    templates = ["plotly_dark",  "simple_white"] #"plotly_white",
+
+    # Add this list of color scales (Plotly built-ins)
+    color_scales = [
+        "Plotly", "Viridis", "Plasma", "Inferno", "Jet", "Rainbow", "RdBu","Portland"
+    ]
+
+
     if selected_plot == "Interactive Plot":
         st.subheader("📊 Interactive Plot")
         chunks_interactive = st.number_input(
-            "How many sentences should be grouped? (Interactive Plot)",
+            "How many groups of 5 sentences do you want to be displayed? (Interactive Plot)",
             min_value=1,
+            max_value=100,
+            value=10,
             step=1,
             key="chunks_interactive"
         )
-        template_interactive = st.selectbox(
+        # Map user-friendly names to Plotly templates
+        template_options = {
+            "Dark Mode": "plotly_dark",
+            "White Mode": "simple_white"
+        }
+        template_interactive_label = st.selectbox(
             "Choose a plot template:",
-            options=templates,
+            options=list(template_options.keys()),
             key="template_interactive"
         )
+        template_interactive = template_options[template_interactive_label]
+        # Map user-friendly names to Plotly color scales
+        color_scale_options = {
+            "Vibrant": "Plotly",
+            "Cool": "Viridis",
+            "Warm": "Plasma",
+            "Dark": "Inferno",
+            "Classic": "Jet",
+            "Rainbow": "Rainbow",
+            "Red-Blue": "RdBu",
+            "Portland": "Portland"
+        }
+        color_scale_label = st.selectbox(
+            "Choose a color scale:",
+            options=list(color_scale_options.keys()),
+            key="color_scale_interactive"
+        )
+        color_scale_interactive = color_scale_options[color_scale_label]
+
         if file_data is not None:
             try:
                 # --- ADAPTED DATAFRAME CREATION ---
-                df1 = pd.DataFrame(file_data)  # Step 1: Convert JSON to DataFrame
-                df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())   # Step 2: Extract 'emotions' column and expand to DataFrame
-                emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)   # Step 3: Expand 'Top_3_Emotions' column into separate columns
-                emotions_df["chunk"] = emotions_df.index  # Convert index to a column called 'chunk'
+                df1 = pd.DataFrame(file_data)
+                df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())
+                emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)
+                emotions_df["chunk"] = emotions_df.index
 
                 plot_stacked_emotions(
                     emotions_df,
                     group_size=chunks_interactive,
-                    template_selected=template_interactive
+                    template_selected=template_interactive,
+                    color_scale=color_scale_interactive
                 )
             except Exception as e:
                 st.error(f"Error while plotting: {e}")
@@ -183,42 +321,85 @@ elif st.session_state.page == "plot":
 
 
 
+
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
         st.subheader("☁️ Wordcloud")
 
-        max_words = st.slider(
-            "Number of words in the Wordcloud:",
-            min_value=10,
-            max_value=200,
-            value=100,
-            step=10,
-            key="max_words_wc"
-        )
+        #max_words = st.slider(
+        #    "Number of words in the Wordcloud:",
+        #    #min_value=100,
+        #    #max_value=000,
+        #    value=100,
+        #    step=10,
+        #    key="max_words_wc"
+        #)
         background_color = st.selectbox(
             "Background color:",
             ["white", "black"],
             key="bg_wc"
         )
 
-        st.write(f"Max words: {max_words}, Background color: {background_color}")
-        st.write("➡️ This is where the word cloud would be displayed.")
+        if file_data is not None:
+            try:
+                # Step 1: Extract the list of emotion entries
+                emotions_list = file_data.get("emotions", [])
 
-    # === Barplot ===
-    #elif selected_plot == "Barplot":
-    #    st.subheader("📶 Barplot")
+                # 🔍 Get list of all unique dominant emotions
+                available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
 
-    #    chunks_bar = st.number_input(
-     #       "How many sentences should be grouped? (Barplot)",
-     #       min_value=1,
-     #       step=1,
-     #       key="chunks_bar"
-     #   )
+                # Select emotion to filter by
+                selected_emotion = st.selectbox("Filter wordcloud by dominant emotion:", ["All"] + available_emotions)
 
-     #   st.write(f"Grouping: {chunks_bar}")
-     #   st.write("➡️ This is where the bar plot would appear.")
+                # Step 2: Filter entries
+                if selected_emotion != "All":
+                    emotions_list = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
 
-    #st.divider()
+                # Step 3: Combine all 'chunk' texts into one string
+                all_text = " ".join(entry.get("chunk", "") for entry in emotions_list)
+
+                # Step 4: Tokenize and count word frequencies
+                stopwords =  ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as",
+                              "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot",
+                              "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each",
+                              "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd",
+                              "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i",
+                              "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me",
+                              "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other",
+                              "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's",
+                              "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them",
+                              "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this",
+                              "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "we'd", "we'll",
+                              "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while",
+                              "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll",
+                              "you're", "you've", "your", "yours", "yourself", "yourselves"]
+
+                words = re.findall(r"\b[a-z]{3,}\b", all_text.lower())
+                words = [w for w in words if w not in stopwords]
+
+                freq_dict = Counter(words)
+
+                if not freq_dict:
+                    st.warning("No words found for the selected emotion.")
+                else:
+                    # Step 5: Generate and display wordcloud
+                    wordcloud = WordCloud(
+                        width=800,
+                        height=400,
+                        background_color=background_color,
+                        max_words=100
+                    ).generate_from_frequencies(freq_dict)
+
+                    fig, ax = plt.subplots(figsize=(10, 5))
+                    ax.imshow(wordcloud, interpolation='bilinear')
+                    ax.axis("off")
+                    st.pyplot(fig)
+
+            except Exception as e:
+                st.error(f"Error generating word cloud: {e}")
+    else:
+        st.info("Please load data to see the word cloud.")
+        
 
     # === Emotions over time Barplot ===
     elif selected_plot == "Barplot":
@@ -238,8 +419,3 @@ elif st.session_state.page == "plot":
         plot_emotion_evolution(df1)
 
 
-    st.divider()
-
-    if st.button("Back"):
-        st.session_state.page = "input"
-        st.rerun()
