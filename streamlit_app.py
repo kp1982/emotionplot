@@ -397,8 +397,8 @@ elif st.session_state.page == "plot":
 
             except Exception as e:
                 st.error(f"Error generating word cloud: {e}")
-    else:
-        st.info("Please load data to see the word cloud.")
+        else:
+            st.info("Please load data to see the word cloud.")
         
 
     # === Emotions over time Barplot ===
