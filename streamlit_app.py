@@ -129,7 +129,7 @@ if st.session_state.page == "novel_input":
 
     # Next button
     if "file_data" in st.session_state:
-        if st.button("🎨 Go to plots"):
+        if st.button("Go to plots"):
             st.session_state.page = "plot"
             st.rerun()
         # Show Get Similar Books button
@@ -221,7 +221,7 @@ if st.session_state.page == "poem_input":
 
     # Next button
     if "file_data" in st.session_state:
-        if st.button("🎨 Go to plots"):
+        if st.button("Go to plots"):
             st.session_state.page = "plot"
             st.rerun()
 
