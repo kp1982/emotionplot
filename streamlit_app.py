@@ -227,14 +227,8 @@ if st.session_state.page == "poem_input":
 
     # Next button
     if st.session_state.confirm_clicked:
-<<<<<<< HEAD
-        if st.button("🚀 Go to plots"):
-            st.session_state.page = "plot_poem"
-=======
-
         if st.button("🚀 Go to plots"):
             st.session_state.page = "plot_poem"  # --- EDIT: changed to 'plot_poem' ---
->>>>>>> 1b8c1bdbb742622c6265a62cb163eb562f3dc9c9
             st.rerun()
 
 #################################################
