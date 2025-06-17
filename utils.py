@@ -1,11 +1,12 @@
 import re
 import requests
 import streamlit as st
+import pandas as pd
 
 def extract_book_id(url: str) -> str:
     match = re.search(r'/ebooks/(\d+)|/epub/(\d+)', url)
 
-  
+
     if match:
         return match.group(1) or match.group(2)
     return "0"  # fallback
@@ -74,4 +75,3 @@ def get_cover_url(book_id: str):
     except:
         pass
     return "https://via.placeholder.com/120x180.png?text=No+Cover"
-
