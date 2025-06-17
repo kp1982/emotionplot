@@ -18,18 +18,12 @@ from stacked_bar_plot import plot_stacked_emotions
 from poem_stacked_bar_plot import poem_plot_stacked_emotions
 from poem_emotion_over_time import poem_plot_emotion_evolution
 
-
-import nltk
-nltk.download("punkt")
-nltk.download("wordnet")
-nltk.download("omw-1.4")
-nltk.download('stopwords')
 import textblob
 from nrclex import NRCLex
 import re
 from utils import text_to_latex, latex_to_paragraph_dataframe
 
-
+textblob.download_corpora()
 
 # Initialize page state
 if "page" not in st.session_state:
