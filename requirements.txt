@@ -5,8 +5,4 @@ plotly>=5.0
 wordcloud>=1.8
 matplotlib>=3.5
 NRCLex
-<<<<<<< fixrecos
-nltk
-=======
 nltk>=3.6
->>>>>>> main
