@@ -227,9 +227,14 @@ if st.session_state.page == "poem_input":
 
     # Next button
     if st.session_state.confirm_clicked:
+<<<<<<< HEAD
+        if st.button("🚀 Go to plots"):
+            st.session_state.page = "plot_poem"
+=======
 
         if st.button("🚀 Go to plots"):
             st.session_state.page = "plot_poem"  # --- EDIT: changed to 'plot_poem' ---
+>>>>>>> 1b8c1bdbb742622c6265a62cb163eb562f3dc9c9
             st.rerun()
 
 #################################################
@@ -564,7 +569,7 @@ elif st.session_state.page == "plot_novel":
 
 
 
-    # === Exaple sentences per emotion ===
+    # === Example sentences per emotion ===
 
     elif selected_plot == "Emotion Examples":
         st.subheader("🔍 Example Sentences by Emotion")
@@ -621,7 +626,7 @@ elif st.session_state.page == "plot_poem":
     st.write("Choose a visualization below to see how emotions unfold in your poem.")
 
     # 👉 Show sidebar menu only if file_data is present
-    if st.session_state.get("file_data") is not None:
+    if st.session_state.get("poem_emotion_data") is not None:
         with st.sidebar:
             st.header("🔧 Settings Menu")
             #st.markdown("Use the sidebar to navigate or adjust plot settings.")
@@ -629,8 +634,8 @@ elif st.session_state.page == "plot_poem":
     else:
         st.error("No data source found. Please go back and enter a URL.")
 
-    if st.session_state.get("file_data") is not None:
-        file_data = st.session_state.file_data  #Load saved data from session state
+    if st.session_state.get("poem_emotion_data") is not None:
+        file_data = st.session_state.poem_emotion_data  #Load poem data from session state
 
         if st.session_state.get("url"):
             url = st.session_state.url
@@ -944,7 +949,7 @@ elif st.session_state.page == "plot_poem":
 
 
 
-    # === Exaple sentences per emotion ===
+    # === Example sentences per emotion ===
 
     elif selected_plot == "Emotion Examples":
         st.subheader("🔍 Example Sentences by Emotion")
@@ -999,14 +1004,37 @@ if st.session_state.page == "recommend_books":
     st.title("📚 Recommended Books")
     st.write("Here are some books similar to the one you analyzed:")
 
+    if st.session_state.get("file_data") is not None:
+        with st.sidebar:
+            st.header("🔧 Settings Menu")
+
+    else:
+        st.error("No data source found. Please go back and enter a URL.")
+
+
     if "recommendations" in st.session_state:
+        with st.sidebar:
+            if st.button("Go to Plots"):
+                st.session_state.page = "plot_novel"
+                st.rerun()
+            st.markdown("Click below to return to start.")
+            if st.button("🔁 Start Over"):
+                st.session_state.clear()
+                st.rerun()
+
         current_book_id = extract_book_id(st.session_state.url)
 
-        # Filter and limit to 3 distinct books
-        filtered_recs = [
-            rec for rec in st.session_state.recommendations
-            if extract_book_id(rec.get("url", "")) != current_book_id
-        ][:3]
+        # Filter for unique book_ids and remove the current book
+        seen_ids = set()
+        filtered_recs = []
+        for rec in st.session_state.recommendations:
+            rec_url = rec.get("url", "")
+            book_id = extract_book_id(rec_url)
+            if book_id and book_id != current_book_id and book_id not in seen_ids:
+                filtered_recs.append(rec)
+                seen_ids.add(book_id)
+            if len(filtered_recs) == 3:
+                break
 
         if not filtered_recs:
             st.warning("No valid recommendations to show.")
@@ -1016,9 +1044,11 @@ if st.session_state.page == "recommend_books":
                 book_id = extract_book_id(url)
                 similarity = rec.get("similarity", 0.0)
 
+                # Fetch metadata
                 title, author = get_book_metadata(book_id)
                 cover_url = get_cover_url(book_id)
 
+                # Display
                 st.image(cover_url, width=120)
                 st.markdown(f"### 📘 {title}")
                 st.markdown(f"👤 *{author}*")
