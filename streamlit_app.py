@@ -195,15 +195,15 @@ if st.session_state.page == "poem_input":
     if st.session_state.confirm_clicked and poem_text and "file_data" not in st.session_state:
         with st.spinner("🔄 Analyzing text and extracting emotions..."):
             try:
-                response = requests.post(
-                    "https://emotionplot-api-znpzhhue6a-ew.a.run.app/analyze",
-                    json={
-                        "text": poem_text,
-                        "sentences_per_chunk": 1,
-                        "model": "accurate",
-                    },
-                    timeout=900,
-                )
+                response = requests.get(
+                    "https://emotionplot-api-644268373090.europe-west1.run.app/analyze_poemlines/",
+                    params={
+                    "poem_text": poem_text,
+                    "model": "accurate",
+                },
+                timeout=900,
+            )
+
                 response.raise_for_status()
                 data = response.json()
                 st.session_state.file_data = data
