@@ -255,7 +255,7 @@ elif st.session_state.page == "plot_novel":
         st.error("No data source found. Please go back and enter a URL.")
 
     if st.session_state.get("file_data") is not None:
-        file_data = st.session_state.file_data  #Load saved data from session state
+        novel_data = st.session_state.file_data  #Load saved data from session state
 
         if st.session_state.get("url"):
             url = st.session_state.url
@@ -406,7 +406,7 @@ elif st.session_state.page == "plot_novel":
         if st.session_state.get("file_data") is not None:
             try:
                 # Step 1: Extract the list of emotion entries
-                emotions_list = file_data.get("emotions", [])
+                emotions_list = novel_data.get("emotions", [])
 
                 # :mag: Get list of all unique dominant emotions
                 available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
@@ -520,7 +520,7 @@ elif st.session_state.page == "plot_novel":
                 st.session_state.clear()
                 st.rerun()
 
-        df1 = pd.DataFrame(st.session_state.file_data)
+        df1 = pd.DataFrame(novel_data)
        # st.subheader("Most Dominant Emotions")
         plot_emotion_frequency(df1, bar_color=bar_color)
 
@@ -565,7 +565,7 @@ elif st.session_state.page == "plot_novel":
                 st.session_state.clear()
                 st.rerun()
 
-        df1 = pd.DataFrame(st.session_state.file_data)
+        df1 = pd.DataFrame(novel_data)
         plot_emotion_evolution(df1, color_scale=color_scale_curve)
 
 
@@ -576,9 +576,9 @@ elif st.session_state.page == "plot_novel":
         st.subheader("🔍 Example Sentences by Emotion")
 
         # Extract emotion data
-        file_data = st.session_state.file_data
+        novel_data = st.session_state.file_data
         # file_data["emotions"] is a list of dicts with at least "Predicted_Emotion" and "chunk"
-        emotions_list = file_data.get("emotions", [])
+        emotions_list = novel_data.get("emotions", [])
 
         # Get all unique emotions
         available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
@@ -636,7 +636,7 @@ elif st.session_state.page == "plot_poem":
         st.error("No data source found. Please go back and enter a URL.")
 
     if st.session_state.get("poem_emotion_data") is not None:
-        file_data = st.session_state.poem_emotion_data  #Load poem data from session state
+        poem_data = st.session_state.poem_emotion_data  #Load poem data from session state
 
         if st.session_state.get("url"):
             url = st.session_state.url
@@ -739,10 +739,10 @@ elif st.session_state.page == "plot_poem":
                 st.session_state.clear()
                 st.rerun()
 
-        if st.session_state.get("file_data") is not None:
+        if st.session_state.get("poem_emotion_data") is not None:
             try:
                 # --- ADAPTED DATAFRAME CREATION ---
-                df1 = pd.DataFrame(file_data)
+                df1 = pd.DataFrame(poem_data)
                 df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())
                 emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)
                 emotions_df["chunk"] = emotions_df.index
@@ -782,10 +782,10 @@ elif st.session_state.page == "plot_poem":
             )
 
 
-        if st.session_state.get("file_data") is not None:
+        if st.session_state.get("poem_emotion_data") is not None:
             try:
                 # Step 1: Extract the list of emotion entries
-                emotions_list = file_data.get("emotions", [])
+                emotions_list = poem_data.get("emotions", [])
 
                 # :mag: Get list of all unique dominant emotions
                 available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
@@ -899,7 +899,7 @@ elif st.session_state.page == "plot_poem":
                 st.session_state.clear()
                 st.rerun()
 
-        df1 = pd.DataFrame(st.session_state.file_data)
+        df1 = pd.DataFrame(poem_data)
        # st.subheader("Most Dominant Emotions")
         plot_emotion_frequency(df1, bar_color=bar_color)
 
@@ -944,7 +944,7 @@ elif st.session_state.page == "plot_poem":
                 st.session_state.clear()
                 st.rerun()
 
-        df1 = pd.DataFrame(st.session_state.file_data)
+        df1 = pd.DataFrame(poem_data)
         poem_plot_emotion_evolution(df1, color_scale=color_scale_curve)
 
 
@@ -956,9 +956,9 @@ elif st.session_state.page == "plot_poem":
         st.subheader("🔍 Example Sentences by Emotion")
 
         # Extract emotion data
-        file_data = st.session_state.file_data
+        poem_data = st.session_state.poem_emotion_data
         # file_data["emotions"] is a list of dicts with at least "Predicted_Emotion" and "chunk"
-        emotions_list = file_data.get("emotions", [])
+        emotions_list = poem_data.get("emotions", [])
 
         # Get all unique emotions
         available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
