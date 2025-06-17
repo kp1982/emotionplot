@@ -396,14 +396,21 @@ elif st.session_state.page == "plot":
                 # Step 1: Extract the list of emotion entries
                 emotions_list = file_data.get("emotions", [])
 
-                # 🔍 Get list of all unique dominant emotions
+                # :mag: Get list of all unique dominant emotions
                 available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
+
+                # Define target emotions
+                target_emotions = {'anger', 'fear', 'surprise', 'sadness', 'joy', 'disgust'}
+
+
+                filtered_emotions = [entry for entry in emotions_list if entry.get("Predicted_Emotion") in target_emotions]
+                available_emotions2 = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in filtered_emotions))
 
                 # Select emotion to filter by
                 with st.sidebar:
-                    selected_emotion = st.selectbox("Filter wordcloud by dominant emotion:", ["All"] + available_emotions)
+                    selected_emotion = st.selectbox("Filter wordcloud by dominant emotion:", ["All"] + available_emotions2)
 
-                # Step 2: Filter entries
+                # Step 2: Filter entriess
                 if selected_emotion != "All":
                     emotions_list = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
 
@@ -427,9 +434,12 @@ elif st.session_state.page == "plot":
                               "you're", "you've", "your", "yours", "yourself", "yourselves"]
 
                 words = re.findall(r"\b[a-z]{3,}\b", all_text.lower())
-                words = [w for w in words if w not in stopwords]
 
-                freq_dict = Counter(words)
+                # Use NRCLex to determine emotional words
+                emotional_words = [word for word in words if NRCLex(word).affect_list]
+                #words = [w for w in words if w not in stopwords]
+
+                freq_dict = Counter(emotional_words)
 
                 if not freq_dict:
                     st.warning("No words found for the selected emotion.")
@@ -457,14 +467,14 @@ elif st.session_state.page == "plot":
 
             st.subheader("Want to get book reccomendations?")
             #st.markdown("Click below to return to start.")
-            if st.button("📚 Get Similar Books"):
+            if st.button(":books: Get Similar Books"):
                 st.session_state.page = "recommend_books"
                 st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
                 st.rerun()
 
-            st.subheader("🚀 Ready to explore another text?")
+            st.subheader(":rocket: Ready to explore another text?")
             st.markdown("Click below to return to start.")
-            if st.button("🔁 Start Over"):
+            if st.button(":repeat: Start Over"):
                 st.session_state.clear()
                 st.rerun()
 
