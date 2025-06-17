@@ -6,7 +6,10 @@ import requests
 
 from emotion_frequency import plot_emotion_frequency
 from emotion_over_time import plot_emotion_evolution
+
 from poem_emotion_over_time import poem_plot_emotion_evolution
+from utils import extract_book_id, get_book_metadata, get_cover_url
+
 
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
@@ -18,6 +21,8 @@ from stacked_bar_plot import plot_stacked_emotions
 from poem_stacked_bar_plot import poem_plot_stacked_emotions
 
 from nrclex import NRCLex
+import re
+from utils import text_to_latex, latex_to_paragraph_dataframe
 
 
 
@@ -106,17 +111,9 @@ if st.session_state.page == "novel_input":
 
                 # Fetch metadata
                 try:
-                    book_id = url.strip("/").split("/")[-1]
-                    meta_url = f"https://gutendex.com/books/{book_id}"
-                    meta_response = requests.get(meta_url)
-                    meta_response.raise_for_status()
-                    metadata = meta_response.json()
-
-                    book_title = metadata.get("title", "Unknown Title")
-                    authors = metadata.get("authors", [])
-                    author_name = authors[0]["name"] if authors else "Unknown Author"
-                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
-
+                    book_id = extract_book_id(url)
+                    title, author = get_book_metadata(book_id)
+                    cover_url = get_cover_url(book_id)
                     # Display book info and cover side by side (only once)
                     info_col, cover_col = st.columns([2, 1])
                     with info_col:
@@ -166,62 +163,39 @@ if st.session_state.get("recommend_clicked") and "recommendations" not in st.ses
     # Prevent re-fetching on every rerun
     st.session_state.recommend_clicked = False
 
-# Page 2 – Poem Input
-# === MODIFIED: Poem input now uses a large text area instead of a URL ===
+
+# === Page 2: Poem Input ===
 if st.session_state.page == "poem_input":
     st.title("📝 Step 1: Paste Your Poem")
     st.write("Paste your poem below. Ideal for shorter texts with emotional density.")
-
     # Large text area for poem input
     poem_text = st.text_area(
         "Paste your poem here:",
         height=300,  # Larger input window
         key="poem_text_input"
     )
-
-    # Show funny GIF only before confirm
+    # Show funny GIF only before confirmation
     if not st.session_state.confirm_clicked:
         st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-
     # Handle Confirm button
     if st.button("Confirm"):
         if poem_text.strip():
             st.session_state.confirm_clicked = True
-            st.session_state.poem_text = poem_text
+            # Convert text to LaTeX format
+            st.session_state.poem_latex = text_to_latex(poem_text)
+            print(st.session_state.poem_latex)
+            # Apply paragraph transformation
+            st.session_state.paragraph_df = latex_to_paragraph_dataframe(st.session_state.poem_latex)
             st.rerun()
         else:
             st.error("Please paste your poem before continuing.")
-
-    # ✅ After confirmation – fetch data and show info
-    if st.session_state.confirm_clicked and poem_text and "file_data" not in st.session_state:
-        with st.spinner("🔄 Analyzing text and extracting emotions..."):
-            try:
-                response = requests.get(
-                    "https://emotionplot-api-644268373090.europe-west1.run.app/analyze_poemlines/",
-                    params={
-                    "poem_text": poem_text,
-                    "model": "accurate",
-                },
-                timeout=900,
-            )
-
-                response.raise_for_status()
-                data = response.json()
-                st.session_state.file_data = data
-                st.session_state.poem_text = poem_text
-
-                # Update progress bar
-                progress_bar = st.progress(100)
-                status_text = st.empty()
-                status_text.text("✅ Done!")
-
-                # No metadata for pasted poems
-                st.write("📖 Custom Poem")
-                st.write("✍️ Unknown Author")
-
-            except requests.exceptions.RequestException as e:
-                st.error(f"❌ API request failed: {e}")
-
+    # ✅ Display LaTeX Output After Confirmation
+    if st.session_state.confirm_clicked:
+        st.subheader("📄 Converted LaTeX Output")
+        st.code(st.session_state.poem_latex, language="latex")
+        # ✅ Display Paragraph DataFrame
+        st.subheader("📊 Extracted Paragraphs from LaTeX")
+        st.dataframe(st.session_state.paragraph_df)
     # Next button
     if "file_data" in st.session_state:
         if st.button("🚀 Go to plots"):
@@ -981,14 +955,26 @@ if st.session_state.page == "recommend_books":
     st.write("Here are some books similar to the one you analyzed:")
 
     if "recommendations" in st.session_state:
+        current_book_id = extract_book_id(st.session_state.url)
         for rec in st.session_state.recommendations:
-            url = rec.get("book_url", "https://www.gutenberg.org")
-            book_id = url.strip("/").split("/")[-1]
-            similarity = rec.get("similarity", 0.0)
+            url = rec.get("url", "https://www.gutenberg.org")
+            rec_book_id = extract_book_id(url)
 
+            # Skip if it's the same book
+            if rec_book_id == current_book_id:
+                continue
+
+            similarity = rec.get("similarity", 0.0)
+            book_id = extract_book_id(url)
+
+            title, author = get_book_metadata(book_id)
+            cover_url = get_cover_url(book_id)
+
+            st.image(cover_url, width=120)
+            st.markdown(f"### 📘 {title}")
+            st.markdown(f"👤 *{author}*")
             st.markdown(f"🔗 **[View Book](https://www.gutenberg.org/ebooks/{book_id})**")
             st.markdown(f"**Similarity:** {similarity:.3f}")
-            st.image(f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg", width=120)
             st.divider()
     else:
         st.warning("No recommendations available. Please analyze a text first.")
