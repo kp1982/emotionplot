@@ -6,7 +6,7 @@ import plotly.colors
 
 ####Plot
 
-def plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False, template_selected="plotly_dark", color_scale="Plotly"):
+def plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False, color_scale="Plotly"):
     """
     Plots a stacked line chart of emotion scores from a DataFrame using Plotly.
     Restricts zoom out so x-axis does not go into negative values.
@@ -73,7 +73,7 @@ def plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False, temp
     max_x = grouped.index.max()
     fig.update_layout(
         barmode='stack',
-        title="Stacked Emotion Scores per Chunk",
+        #title="Stacked Emotion Scores per Chunk",
         xaxis=dict(
             title=f"{group_size * 5} sentences per chunk",
             rangeslider=dict(visible=True),
@@ -86,9 +86,9 @@ def plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False, temp
             title="Emotion Score"
         ),
         height=600,
-        legend_title="Emotion",
+        legend_title="Click on emotions to show/hide",
         dragmode="pan",
-        template=template_selected
+        template="plotly_dark"
     )
 
     st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": True})
