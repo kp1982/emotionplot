@@ -15,6 +15,8 @@ import time
 import plotly.colors
 from stacked_bar_plot import plot_stacked_emotions
 
+from nrclex import NRCLex
+
 
 
 # Initialize page state
