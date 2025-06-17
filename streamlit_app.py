@@ -1,6 +1,3 @@
-import os
-nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'nltk_data'))
-
 import streamlit as st
 import json
 import plotly.graph_objects as go
