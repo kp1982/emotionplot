@@ -379,7 +379,7 @@ elif st.session_state.page == "plot_novel":
 
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
-        st.subheader("☁️ Emotion Wordcloud TEST")
+        st.subheader("☁️ Emotion Wordcloud")
 
         with st.sidebar:
             st.subheader("Wordcloud Settings")
@@ -448,7 +448,8 @@ elif st.session_state.page == "plot_novel":
                         width=800,
                         height=400,
                         background_color=background_color,
-                        max_words=100
+                        max_words=100,
+                        font_path="assets/Roboto-Regular.ttf"
                     ).generate_from_frequencies(freq_dict)
 
                     fig, ax = plt.subplots(figsize=(10, 5))
