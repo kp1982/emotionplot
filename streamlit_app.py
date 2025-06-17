@@ -192,7 +192,7 @@ if st.session_state.page == "poem_input":
     # Show funny GIF only before confirmation
     if not st.session_state.confirm_clicked:
         st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-    
+
     # Confirm button
     if st.button("Confirm"):
         if poem_text.strip():
@@ -357,7 +357,7 @@ elif st.session_state.page == "plot_novel":
         if st.session_state.get("file_data") is not None:
             try:
                 # --- ADAPTED DATAFRAME CREATION ---
-                df1 = pd.DataFrame(file_data)
+                df1 = pd.DataFrame(novel_data)
                 df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())
                 emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)
                 emotions_df["chunk"] = emotions_df.index
