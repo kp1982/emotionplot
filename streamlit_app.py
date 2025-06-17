@@ -19,11 +19,19 @@ from poem_stacked_bar_plot import poem_plot_stacked_emotions
 from poem_emotion_over_time import poem_plot_emotion_evolution
 
 import textblob
+import textblob.download_corpora
+
 from nrclex import NRCLex
 import re
 from utils import text_to_latex, latex_to_paragraph_dataframe
 
 import corpora
+
+import nltk
+
+nltk.download("punkt")
+nltk.download("averaged_perceptron_tagger")
+nltk.download("wordnet")
 
 # Initialize page state
 if "page" not in st.session_state:
@@ -439,17 +447,18 @@ elif st.session_state.page == "plot_novel":
                 #words = [w for w in words if w not in stopwords]
 
                 freq_dict = Counter(emotional_words)
+                #font_path = "assets/Roboto-Regular.ttf"
 
                 if not freq_dict:
                     st.warning("No words found for the selected emotion.")
                 else:
                     # Step 5: Generate and display wordcloud
                     wordcloud = WordCloud(
+                        #font_path=font_path,
                         width=800,
                         height=400,
                         background_color=background_color,
-                        max_words=100,
-                        font_path="assets/Roboto-Regular.ttf"
+                        max_words=100
                     ).generate_from_frequencies(freq_dict)
 
                     fig, ax = plt.subplots(figsize=(10, 5))
