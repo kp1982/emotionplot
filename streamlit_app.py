@@ -164,12 +164,17 @@ if st.session_state.get("recommend_clicked") and "recommendations" not in st.ses
     st.session_state.recommend_clicked = False
 
 # Page 2 – Poem Input
+# === MODIFIED: Poem input now uses a large text area instead of a URL ===
 if st.session_state.page == "poem_input":
-    st.title("📝 Step 1: Paste Your Poem Link")
-    st.write("Paste a URL to your poem. Ideal for shorter texts with emotional density.")
-    # st.write("Please enter the URL:")
+    st.title("📝 Step 1: Paste Your Poem")
+    st.write("Paste your poem below. Ideal for shorter texts with emotional density.")
 
-    url = st.text_input("Enter the URL of the novel/text:")
+    # Large text area for poem input
+    poem_text = st.text_area(
+        "Paste your poem here:",
+        height=300,  # Larger input window
+        key="poem_text_input"
+    )
 
     # Show funny GIF only before confirm
     if not st.session_state.confirm_clicked:
@@ -177,22 +182,21 @@ if st.session_state.page == "poem_input":
 
     # Handle Confirm button
     if st.button("Confirm"):
-        if url:
+        if poem_text.strip():
             st.session_state.confirm_clicked = True
-            st.session_state.url = url
+            st.session_state.poem_text = poem_text
             st.rerun()
         else:
-            st.error("Please enter a valid URL.")
+            st.error("Please paste your poem before continuing.")
 
-    # ✅ After confirmation – fetch data and show book info
-    if st.session_state.confirm_clicked and url and "file_data" not in st.session_state:
-        # Actual API request
+    # ✅ After confirmation – fetch data and show info
+    if st.session_state.confirm_clicked and poem_text and "file_data" not in st.session_state:
         with st.spinner("🔄 Analyzing text and extracting emotions..."):
             try:
-                response = requests.get(
+                response = requests.post(
                     "https://emotionplot-api-znpzhhue6a-ew.a.run.app/analyze",
-                    params={
-                        "url": url,
+                    json={
+                        "text": poem_text,
                         "sentences_per_chunk": 1,
                         "model": "accurate",
                     },
@@ -201,33 +205,16 @@ if st.session_state.page == "poem_input":
                 response.raise_for_status()
                 data = response.json()
                 st.session_state.file_data = data
-                st.session_state.url = url
+                st.session_state.poem_text = poem_text
 
                 # Update progress bar
                 progress_bar = st.progress(100)
                 status_text = st.empty()
                 status_text.text("✅ Done!")
 
-                # Fetch metadata
-                try:
-                    book_id = url.strip("/").split("/")[-1]
-                    meta_url = f"https://gutendex.com/books/{book_id}"
-                    meta_response = requests.get(meta_url)
-                    meta_response.raise_for_status()
-                    metadata = meta_response.json()
-
-                    book_title = metadata.get("title", "Unknown Title")
-                    authors = metadata.get("authors", [])
-                    author_name = authors[0]["name"] if authors else "Unknown Author"
-                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
-
-                    #st.success("✅ API data loaded successfully!")
-                    st.write(f"📖 {book_title}")
-                    st.write(f"✍️ {author_name}")
-                    st.image(cover_url, width=150)
-
-                except Exception:
-                    status_text.text("✅ Done!")
+                # No metadata for pasted poems
+                st.write("📖 Custom Poem")
+                st.write("✍️ Unknown Author")
 
             except requests.exceptions.RequestException as e:
                 st.error(f"❌ API request failed: {e}")
@@ -237,8 +224,6 @@ if st.session_state.page == "poem_input":
         if st.button("Go to plots"):
             st.session_state.page = "plot"
             st.rerun()
-            #else:
-            #   st.error("Please confirm a valid URL before continuing.")
 
 
 # Page 3 – Plot Output
