@@ -387,14 +387,6 @@ elif st.session_state.page == "plot_novel":
     elif selected_plot == "Wordcloud":
         st.subheader("☁️ Emotion Wordcloud")
 
-        #max_words = st.slider(
-        #    "Number of words in the Wordcloud:",
-        #    #min_value=100,
-        #    #max_value=000,
-        #    value=100,
-        #    step=10,
-        #    key="max_words_wc"
-        #)
         with st.sidebar:
             st.subheader("Wordcloud Settings")
             background_color = st.selectbox(
