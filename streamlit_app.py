@@ -385,7 +385,7 @@ elif st.session_state.page == "plot_novel":
 
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
-        st.subheader("☁️ Emotion Wordcloud")
+        st.subheader("☁️ Emotion Wordcloud TEST")
 
         with st.sidebar:
             st.subheader("Wordcloud Settings")
