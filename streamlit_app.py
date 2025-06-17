@@ -219,15 +219,15 @@ if st.session_state.page == "poem_input":
                 # Update progress bar
                 progress_bar = st.progress(100)
                 status_text = st.empty()
-                status_text.text("✅ Done!")
 
         except requests.exceptions.RequestException as e:
             st.error(f"❌ Emotion analysis failed: {e}")
             st.stop()
         st.rerun()
 
-    # Next button
+    # Next button and "Done" status
     if st.session_state.confirm_clicked and "poem_emotion_data" in st.session_state:
+        st.text("✅ Done!")
         if st.button("🚀 Go to plots"):
             st.session_state.page = "plot_poem"  # --- EDIT: changed to 'plot_poem' ---
             st.rerun()
