@@ -448,8 +448,7 @@ elif st.session_state.page == "plot_novel":
                         width=800,
                         height=400,
                         background_color=background_color,
-                        max_words=100,
-                        font_path="assets/Roboto-Regular.ttf"
+                        max_words=100
                     ).generate_from_frequencies(freq_dict)
 
                     fig, ax = plt.subplots(figsize=(10, 5))
