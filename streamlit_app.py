@@ -178,6 +178,7 @@ if st.session_state.get("recommend_clicked") and "recommendations" not in st.ses
     st.session_state.recommend_clicked = False
 
 
+
 # === Page 2: Poem Input ===
 if st.session_state.page == "poem_input":
     st.title("📝 Step 1: Paste Your Poem")
@@ -191,49 +192,42 @@ if st.session_state.page == "poem_input":
     # Show funny GIF only before confirmation
     if not st.session_state.confirm_clicked:
         st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+    
     # Confirm button
     if st.button("Confirm"):
         if poem_text.strip():
             st.session_state.confirm_clicked = True
             st.session_state.poem_latex = text_to_latex(poem_text)
             st.session_state.paragraph_df = latex_to_paragraph_dataframe(st.session_state.poem_latex)
-
-            # ✅ Emotion API call
-            with st.spinner("🔍 Analyzing emotions in your poem..."):
-                try:
-                    response = requests.get(
-                        "https://emotionplot-api-644268373090.europe-west1.run.app/analyze_poemlines/",
-                        params={"poem_text": st.session_state.poem_latex, "model": "accurate"},
-                        timeout=1800
-                    )
-                    response.raise_for_status()
-                    data = response.json()
-                    st.session_state.poem_emotion_data = data
-
-                    # Update progress bar
-                    progress_bar = st.progress(100)
-                    status_text = st.empty()
-                    status_text.text("✅ Done!")
-
-
-                except requests.exceptions.RequestException as e:
-                    st.error(f"❌ Emotion analysis failed: {e}")
-                    st.stop()
-
             st.rerun()
         else:
             st.error("Please paste your poem before continuing.")
 
-    # Show LaTeX preview and paragraphs
-    #if st.session_state.confirm_clicked:
-    #    st.subheader("📄 Converted LaTeX Output")
-    #    st.code(st.session_state.poem_latex, language="latex")
+    # After confirmation, fetch emotion data if not already present
+    if st.session_state.confirm_clicked and "poem_emotion_data" not in st.session_state:
+        try:
+            with st.spinner("🔄 Analyzing emotions in your poem..."):
+                response = requests.get(
+                    "https://emotionplot-api-644268373090.europe-west1.run.app/analyze_poemlines/",
+                    params={"poem_text": st.session_state.poem_latex, "model": "accurate"},
+                    timeout=1800
+                )
+                response.raise_for_status()
+                data = response.json()
+                st.session_state.poem_emotion_data = data
 
-    #    st.subheader("📊 Extracted Paragraphs from LaTeX")
-    #    st.dataframe(st.session_state.paragraph_df)
+                # Update progress bar
+                progress_bar = st.progress(100)
+                status_text = st.empty()
+                status_text.text("✅ Done!")
+
+        except requests.exceptions.RequestException as e:
+            st.error(f"❌ Emotion analysis failed: {e}")
+            st.stop()
+        st.rerun()
 
     # Next button
-    if st.session_state.confirm_clicked:
+    if st.session_state.confirm_clicked and "poem_emotion_data" in st.session_state:
         if st.button("🚀 Go to plots"):
             st.session_state.page = "plot_poem"  # --- EDIT: changed to 'plot_poem' ---
             st.rerun()
