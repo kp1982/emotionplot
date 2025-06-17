@@ -191,27 +191,43 @@ if st.session_state.page == "poem_input":
     # Show funny GIF only before confirmation
     if not st.session_state.confirm_clicked:
         st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-    # Handle Confirm button
+    # Confirm button
     if st.button("Confirm"):
         if poem_text.strip():
             st.session_state.confirm_clicked = True
-            # Convert text to LaTeX format
             st.session_state.poem_latex = text_to_latex(poem_text)
-            print(st.session_state.poem_latex)
-            # Apply paragraph transformation
             st.session_state.paragraph_df = latex_to_paragraph_dataframe(st.session_state.poem_latex)
+
+            # ✅ Emotion API call
+            with st.spinner("🔍 Analyzing emotions in your poem..."):
+                try:
+                    response = requests.get(
+                        "https://emotionplot-api-644268373090.europe-west1.run.app/analyze_poemlines/",
+                        params={"poem_text": st.session_state.poem_latex, "model": "accurate"},
+                        timeout=1800
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                    st.session_state.poem_emotion_data = data
+                except requests.exceptions.RequestException as e:
+                    st.error(f"❌ Emotion analysis failed: {e}")
+                    st.stop()
+
             st.rerun()
         else:
             st.error("Please paste your poem before continuing.")
-    # ✅ Display LaTeX Output After Confirmation
-    if st.session_state.confirm_clicked:
-        st.subheader("📄 Converted LaTeX Output")
-        st.code(st.session_state.poem_latex, language="latex")
-        # ✅ Display Paragraph DataFrame
-        st.subheader("📊 Extracted Paragraphs from LaTeX")
-        st.dataframe(st.session_state.paragraph_df)
+
+    # Show LaTeX preview and paragraphs
+    #if st.session_state.confirm_clicked:
+    #    st.subheader("📄 Converted LaTeX Output")
+    #    st.code(st.session_state.poem_latex, language="latex")
+
+    #    st.subheader("📊 Extracted Paragraphs from LaTeX")
+    #    st.dataframe(st.session_state.paragraph_df)
+
     # Next button
     if st.session_state.confirm_clicked:
+
         if st.button("🚀 Go to plots"):
             st.session_state.page = "plot_poem"  # --- EDIT: changed to 'plot_poem' ---
             st.rerun()
@@ -336,7 +352,9 @@ elif st.session_state.page == "plot_novel":
                 st.session_state.clear()
                 st.rerun()
 
-        if file_data is not None:
+
+
+        if st.session_state.get("file_data") is not None:
             try:
                 # --- ADAPTED DATAFRAME CREATION ---
                 df1 = pd.DataFrame(file_data)
@@ -379,7 +397,7 @@ elif st.session_state.page == "plot_novel":
             )
 
 
-        if file_data is not None:
+        if st.session_state.get("file_data") is not None:
             try:
                 # Step 1: Extract the list of emotion entries
                 emotions_list = file_data.get("emotions", [])
@@ -715,7 +733,7 @@ elif st.session_state.page == "plot_poem":
                 st.session_state.clear()
                 st.rerun()
 
-        if file_data is not None:
+        if st.session_state.get("file_data") is not None:
             try:
                 # --- ADAPTED DATAFRAME CREATION ---
                 df1 = pd.DataFrame(file_data)
@@ -758,7 +776,7 @@ elif st.session_state.page == "plot_poem":
             )
 
 
-        if file_data is not None:
+        if st.session_state.get("file_data") is not None:
             try:
                 # Step 1: Extract the list of emotion entries
                 emotions_list = file_data.get("emotions", [])
@@ -983,25 +1001,29 @@ if st.session_state.page == "recommend_books":
 
     if "recommendations" in st.session_state:
         current_book_id = extract_book_id(st.session_state.url)
-        for rec in st.session_state.recommendations:
-            url = rec.get("url", "https://www.gutenberg.org")
-            rec_book_id = extract_book_id(url)
 
-            # Skip if it's the same book
-            if rec_book_id == current_book_id:
-                continue
+        # Filter and limit to 3 distinct books
+        filtered_recs = [
+            rec for rec in st.session_state.recommendations
+            if extract_book_id(rec.get("url", "")) != current_book_id
+        ][:3]
 
-            similarity = rec.get("similarity", 0.0)
-            book_id = extract_book_id(url)
+        if not filtered_recs:
+            st.warning("No valid recommendations to show.")
+        else:
+            for rec in filtered_recs:
+                url = rec.get("url", "https://www.gutenberg.org")
+                book_id = extract_book_id(url)
+                similarity = rec.get("similarity", 0.0)
 
-            title, author = get_book_metadata(book_id)
-            cover_url = get_cover_url(book_id)
+                title, author = get_book_metadata(book_id)
+                cover_url = get_cover_url(book_id)
 
-            st.image(cover_url, width=120)
-            st.markdown(f"### 📘 {title}")
-            st.markdown(f"👤 *{author}*")
-            st.markdown(f"🔗 **[View Book](https://www.gutenberg.org/ebooks/{book_id})**")
-            st.markdown(f"**Similarity:** {similarity:.3f}")
-            st.divider()
+                st.image(cover_url, width=120)
+                st.markdown(f"### 📘 {title}")
+                st.markdown(f"👤 *{author}*")
+                st.markdown(f"🔗 **[View Book](https://www.gutenberg.org/ebooks/{book_id})**")
+                st.markdown(f"**Similarity:** {similarity:.3f}")
+                st.divider()
     else:
         st.warning("No recommendations available. Please analyze a text first.")
