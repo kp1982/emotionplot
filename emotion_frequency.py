@@ -57,7 +57,7 @@ def plot_emotion_frequency(data, bar_color="pink"):    # CHANGE: ADD BAR_COLOR P
 
     #fig.update_traces(texttemplate='%{x}<br>%{y:.2f}%', textposition='outside')
     fig.update_layout(
-        title="📊 Average Intensity of Emotions Across All Chunks",
+        #title="📊 Average Intensity of Emotions Across All Chunks",
         xaxis_title="Emotion",
         yaxis_title="Normalized Frequency (%)",
         yaxis=dict(range=[0, max(normalized_means) * 1.15]),

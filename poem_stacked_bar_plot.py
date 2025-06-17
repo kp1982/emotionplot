@@ -73,7 +73,7 @@ def poem_plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False,
     max_x = grouped.index.max()
     fig.update_layout(
         barmode='stack',
-        title="Stacked Emotion Scores per Chunk",
+        #title="Stacked Emotion Scores per Chunk",
         xaxis=dict(
             title=f"{group_size} sentences per chunk",
             rangeslider=dict(visible=True),
@@ -86,7 +86,7 @@ def poem_plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False,
             title="Emotion Score"
         ),
         height=600,
-        legend_title="Emotion",
+        legend_title="Click on emotions to show/hide",
         dragmode="pan",
         template=template_selected
     )
