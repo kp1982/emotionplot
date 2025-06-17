@@ -397,7 +397,7 @@ elif st.session_state.page == "plot_novel":
 
 
     # === Wordcloud ===
-    elif selected_plot == "Wordcloud":
+    elif selected_plot == "Wordcloud test test ":
         st.subheader("☁️ Emotion Wordcloud")
 
         #max_words = st.slider(
