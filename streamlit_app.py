@@ -23,7 +23,10 @@ from nrclex import NRCLex
 import re
 from utils import text_to_latex, latex_to_paragraph_dataframe
 
-textblob.download_corpora()
+import subprocess
+cmd = ['python3','-m','textblob.download_corpora']
+subprocess.run(cmd)
+print("Working")
 
 # Initialize page state
 if "page" not in st.session_state:
