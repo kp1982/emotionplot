@@ -5,5 +5,5 @@ plotly>=5.0
 wordcloud>=1.8
 matplotlib>=3.5
 NRCLex
-nltk>=3.7
-textblob>=0.17
+nltk
+textblob
