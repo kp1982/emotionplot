@@ -192,7 +192,7 @@ if st.session_state.page == "poem_input":
     # Show funny GIF only before confirmation
     if not st.session_state.confirm_clicked:
         st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-    
+
     # Confirm button
     if st.button("Confirm"):
         if poem_text.strip():
@@ -687,7 +687,7 @@ elif st.session_state.page == "plot_poem":
                 "How many groups sentences do you want to be displayed?",
                 min_value=1,
                 max_value=100,
-                value=10,
+                value=1,
                 step=1,
                 key="chunks_interactive"
             )
