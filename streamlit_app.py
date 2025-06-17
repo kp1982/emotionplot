@@ -209,6 +209,13 @@ if st.session_state.page == "poem_input":
                     response.raise_for_status()
                     data = response.json()
                     st.session_state.poem_emotion_data = data
+
+                    # Update progress bar
+                    progress_bar = st.progress(100)
+                    status_text = st.empty()
+                    status_text.text("✅ Done!")
+
+
                 except requests.exceptions.RequestException as e:
                     st.error(f"❌ Emotion analysis failed: {e}")
                     st.stop()
@@ -235,7 +242,7 @@ if st.session_state.page == "poem_input":
 # Page 3 – Plot Output Novel
 #################################################
 elif st.session_state.page == "plot_novel":
-    st.title("📊 Step 2: Explore the Emotions")
+    st.title("📖 Step 2: Explore the Emotions of the Novel")
     st.write("Choose a visualization below to see how emotions unfold in your text.")
 
     # 👉 Show sidebar menu only if file_data is present
@@ -616,7 +623,7 @@ elif st.session_state.page == "plot_novel":
 # Page 4 – Plot poem Output
 #################################################
 elif st.session_state.page == "plot_poem":
-    st.title("📊 Step 2: Explore the Emotions of a Poem")
+    st.title("📝 Step 2: Explore the Emotions of a Poem")
     st.write("Choose a visualization below to see how emotions unfold in your poem.")
 
     # 👉 Show sidebar menu only if file_data is present
