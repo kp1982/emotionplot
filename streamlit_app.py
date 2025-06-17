@@ -19,7 +19,7 @@ from poem_stacked_bar_plot import poem_plot_stacked_emotions
 from poem_emotion_over_time import poem_plot_emotion_evolution
 
 import textblob
-import textblob.download_corpora
+from textblob import download_corpora
 
 from nrclex import NRCLex
 import re
@@ -32,6 +32,12 @@ import nltk
 nltk.download("punkt")
 nltk.download("averaged_perceptron_tagger")
 nltk.download("wordnet")
+
+# Download TextBlob corpora
+try:
+    download_corpora.download_all()
+except:
+    pass
 
 # Initialize page state
 if "page" not in st.session_state:
