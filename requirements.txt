@@ -4,3 +4,4 @@ requests>=2.25
 plotly>=5.0
 wordcloud>=1.8
 matplotlib>=3.5
+nrclex
