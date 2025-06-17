@@ -6,6 +6,7 @@ import requests
 
 from emotion_frequency import plot_emotion_frequency
 from emotion_over_time import plot_emotion_evolution
+from utils import extract_book_id, get_book_metadata, get_cover_url
 
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
@@ -105,17 +106,9 @@ if st.session_state.page == "novel_input":
 
                 # Fetch metadata
                 try:
-                    book_id = url.strip("/").split("/")[-1]
-                    meta_url = f"https://gutendex.com/books/{book_id}"
-                    meta_response = requests.get(meta_url)
-                    meta_response.raise_for_status()
-                    metadata = meta_response.json()
-
-                    book_title = metadata.get("title", "Unknown Title")
-                    authors = metadata.get("authors", [])
-                    author_name = authors[0]["name"] if authors else "Unknown Author"
-                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
-
+                    book_id = extract_book_id(url)
+                    title, author = get_book_metadata(book_id)
+                    cover_url = get_cover_url(book_id)
                     # Display book info and cover side by side (only once)
                     info_col, cover_col = st.columns([2, 1])
                     with info_col:
@@ -1004,14 +997,26 @@ if st.session_state.page == "recommend_books":
     st.write("Here are some books similar to the one you analyzed:")
 
     if "recommendations" in st.session_state:
+        current_book_id = extract_book_id(st.session_state.url)
         for rec in st.session_state.recommendations:
-            url = rec.get("book_url", "https://www.gutenberg.org")
-            book_id = url.strip("/").split("/")[-1]
-            similarity = rec.get("similarity", 0.0)
+            url = rec.get("url", "https://www.gutenberg.org")
+            rec_book_id = extract_book_id(url)
 
+            # Skip if it's the same book
+            if rec_book_id == current_book_id:
+                continue
+
+            similarity = rec.get("similarity", 0.0)
+            book_id = extract_book_id(url)
+
+            title, author = get_book_metadata(book_id)
+            cover_url = get_cover_url(book_id)
+
+            st.image(cover_url, width=120)
+            st.markdown(f"### 📘 {title}")
+            st.markdown(f"👤 *{author}*")
             st.markdown(f"🔗 **[View Book](https://www.gutenberg.org/ebooks/{book_id})**")
             st.markdown(f"**Similarity:** {similarity:.3f}")
-            st.image(f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg", width=120)
             st.divider()
     else:
         st.warning("No recommendations available. Please analyze a text first.")
