@@ -54,7 +54,15 @@ if st.session_state.page == "start":
             st.session_state.page = "poem_input"
             st.rerun()
 
+
+
 # Page 1 – Novel Input
+if "page" not in st.session_state:
+    st.session_state.page = "input"
+if "confirm_clicked" not in st.session_state:
+    st.session_state.confirm_clicked = False
+
+# Page 1 – URL novel_input
 if "page" not in st.session_state:
     st.session_state.page = "input"
 if "confirm_clicked" not in st.session_state:
@@ -109,9 +117,17 @@ if st.session_state.page == "novel_input":
 
                 # Fetch metadata
                 try:
-                    book_id = extract_book_id(url)
-                    title, author = get_book_metadata(book_id)
-                    cover_url = get_cover_url(book_id)
+                    book_id = url.strip("/").split("/")[-1]
+                    meta_url = f"https://gutendex.com/books/{book_id}"
+                    meta_response = requests.get(meta_url)
+                    meta_response.raise_for_status()
+                    metadata = meta_response.json()
+
+                    book_title = metadata.get("title", "Unknown Title")
+                    authors = metadata.get("authors", [])
+                    author_name = authors[0]["name"] if authors else "Unknown Author"
+                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+
                     # Display book info and cover side by side (only once)
                     info_col, cover_col = st.columns([2, 1])
                     with info_col:
@@ -355,7 +371,7 @@ elif st.session_state.page == "plot_novel":
         #    key="max_words_wc"
         #)
         with st.sidebar:
-            st.subheader("☁️ Wordcloud Settings")
+            st.subheader("Wordcloud Settings")
             background_color = st.selectbox(
             "Background color:",
             ["white", "black"],
@@ -474,7 +490,7 @@ elif st.session_state.page == "plot_novel":
                 st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
                 st.rerun()
 
-            st.subheader("🚀 Ready to explore another text?")
+            st.subheader("Ready to explore another text?")
             #st.markdown("Click below to return to start.")
             if st.button("🔁 Start Over"):
                 st.session_state.clear()
@@ -495,7 +511,7 @@ elif st.session_state.page == "plot_novel":
 
         # Sidebar settings for color scale
         with st.sidebar:
-            st.subheader("Average Emotion Intensity Settings")
+            st.subheader("Emotional Shifts Settings")
             color_scale_options = {
                 "Vibrant": "Plotly",
                 "Cool": "Viridis",
@@ -544,7 +560,7 @@ elif st.session_state.page == "plot_novel":
         available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
 
         with st.sidebar:
-            st.subheader("🔍 Emotion Example Settings")
+            st.subheader("Emotion Example Settings")
             selected_emotion = st.selectbox("Select an emotion:", available_emotions)
             num_examples = st.slider("Number of example sentences:", min_value=1, max_value=5, value=3, step=1)
 
@@ -572,7 +588,7 @@ elif st.session_state.page == "plot_novel":
                 st.rerun()
 
         with st.sidebar:
-            st.subheader("🚀 Ready to explore another text?")
+            st.subheader("Ready to explore another text?")
             #st.markdown("Click below to return to start.")
             if st.button("🔁 Start Over"):
                 st.session_state.clear()
@@ -853,7 +869,7 @@ elif st.session_state.page == "plot_poem":
                 st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
                 st.rerun()
 
-            st.subheader("🚀 Ready to explore another text?")
+            st.subheader("Ready to explore another text?")
             #st.markdown("Click below to return to start.")
             if st.button("🔁 Start Over"):
                 st.session_state.clear()
@@ -952,7 +968,7 @@ elif st.session_state.page == "plot_poem":
                 st.rerun()
 
         with st.sidebar:
-            st.subheader("🚀 Ready to explore another text?")
+            st.subheader("Ready to explore another text?")
             #st.markdown("Click below to return to start.")
             if st.button("🔁 Start Over"):
                 st.session_state.clear()
