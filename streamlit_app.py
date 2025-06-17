@@ -20,23 +20,10 @@ from poem_emotion_over_time import poem_plot_emotion_evolution
 
 
 import nltk
+nltk.download("punkt")
+nltk.download("wordnet")
+nltk.download("omw-1.4")
 import textblob
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-try:
-    nltk.data.find('corpora/wordnet')
-except LookupError:
-    nltk.download('wordnet')
-try:
-    nltk.data.find('taggers/averaged_perceptron_tagger')
-except LookupError:
-    nltk.download('averaged_perceptron_tagger')
-try:
-    textblob.download_corpora.download_all()
-except Exception:
-    pass
 
 from nrclex import NRCLex
 import re
