@@ -70,7 +70,7 @@ if "confirm_clicked" not in st.session_state:
 
 # Page 1 – URL novel_input
 if st.session_state.page == "novel_input":
-    st.title("📖 Step 1: Paste Your Novel Link test test")
+    st.title("📖 Step 1: Paste Your Novel Link")
     st.write("Paste a URL from **Project Gutenberg** or another online source. We'll fetch the text and analyze its emotions.")
 
     # st.write("Please enter the URL:")
