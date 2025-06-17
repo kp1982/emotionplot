@@ -7,4 +7,3 @@ matplotlib>=3.5
 NRCLex
 nltk
 textblob
-streamlit-wordcloud-v2
