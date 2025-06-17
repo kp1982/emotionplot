@@ -16,6 +16,8 @@ import plotly.colors
 from stacked_bar_plot import plot_stacked_emotions
 
 from nrclex import NRCLex
+import re
+from utils import text_to_latex, latex_to_paragraph_dataframe
 
 
 
@@ -165,64 +167,41 @@ if st.session_state.get("recommend_clicked") and "recommendations" not in st.ses
     # Prevent re-fetching on every rerun
     st.session_state.recommend_clicked = False
 
-# Page 2 – Poem Input
-# === MODIFIED: Poem input now uses a large text area instead of a URL ===
+
+# === Page 2: Poem Input ===
 if st.session_state.page == "poem_input":
     st.title("📝 Step 1: Paste Your Poem")
     st.write("Paste your poem below. Ideal for shorter texts with emotional density.")
-
     # Large text area for poem input
     poem_text = st.text_area(
         "Paste your poem here:",
         height=300,  # Larger input window
         key="poem_text_input"
     )
-
-    # Show funny GIF only before confirm
+    # Show funny GIF only before confirmation
     if not st.session_state.confirm_clicked:
         st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
-
     # Handle Confirm button
     if st.button("Confirm"):
         if poem_text.strip():
             st.session_state.confirm_clicked = True
-            st.session_state.poem_text = poem_text
+            # Convert text to LaTeX format
+            st.session_state.poem_latex = text_to_latex(poem_text)
+            print(st.session_state.poem_latex)
+            # Apply paragraph transformation
+            st.session_state.paragraph_df = latex_to_paragraph_dataframe(st.session_state.poem_latex)
             st.rerun()
         else:
             st.error("Please paste your poem before continuing.")
-
-    # ✅ After confirmation – fetch data and show info
-    if st.session_state.confirm_clicked and poem_text and "file_data" not in st.session_state:
-        with st.spinner("🔄 Analyzing text and extracting emotions..."):
-            try:
-                response = requests.get(
-                    "https://emotionplot-api-644268373090.europe-west1.run.app/analyze_poemlines/",
-                    params={
-                    "poem_text": poem_text,
-                    "model": "accurate",
-                },
-                timeout=900,
-            )
-
-                response.raise_for_status()
-                data = response.json()
-                st.session_state.file_data = data
-                st.session_state.poem_text = poem_text
-
-                # Update progress bar
-                progress_bar = st.progress(100)
-                status_text = st.empty()
-                status_text.text("✅ Done!")
-
-                # No metadata for pasted poems
-                st.write("📖 Custom Poem")
-                st.write("✍️ Unknown Author")
-
-            except requests.exceptions.RequestException as e:
-                st.error(f"❌ API request failed: {e}")
-
+    # ✅ Display LaTeX Output After Confirmation
+    if st.session_state.confirm_clicked:
+        st.subheader("📄 Converted LaTeX Output")
+        st.code(st.session_state.poem_latex, language="latex")
+        # ✅ Display Paragraph DataFrame
+        st.subheader("📊 Extracted Paragraphs from LaTeX")
+        st.dataframe(st.session_state.paragraph_df)
     # Next button
-    if "file_data" in st.session_state:
+    if st.session_state.confirm_clicked:
         if st.button("Go to plots"):
             st.session_state.page = "plot"
             st.rerun()
