@@ -687,7 +687,7 @@ elif st.session_state.page == "plot_poem":
                 "How many groups sentences do you want to be displayed?",
                 min_value=1,
                 max_value=100,
-                value=10,
+                value=1,
                 step=1,
                 key="chunks_interactive"
             )

@@ -33,7 +33,11 @@ def poem_plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False,
         "relief", "pride", "gratitude", "love", "sadness", "curiosity", "surprise",
         "fear", "disapproval", "joy", "anger"
     ]
-    default_visible = set(["anger", "joy", "disapproval", "fear", "surprise", "curiosity", "sadness"])
+    default_visible = set(["grief", "disgust", "remorse", "disappointment", "annoyance",
+        "embarrassment", "nervousness", "confusion", "realization", "desire",
+        "caring", "optimism", "excitement", "approval", "admiration", "amusement",
+        "relief", "pride", "gratitude", "love", "sadness", "curiosity", "surprise",
+        "fear", "disapproval", "joy", "anger"])
 
     # Get color scale from Plotly
     try:
