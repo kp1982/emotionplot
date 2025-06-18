@@ -5,6 +5,8 @@ import streamlit as st
 
 def poem_plot_emotion_evolution(df, default_emotion="amusement", color_scale="Plotly"):
     df["Top_3_Emotions"] = df["emotions"].apply(lambda x: x.get("Top_3_Emotions", {}))
+    #df["line_text"] = df["emotions"].apply(lambda x: x.get("line_text", ""))
+
     emotion_records = []
     for idx, row in df.iterrows():
         for emotion, score in row['Top_3_Emotions'].items():
@@ -15,6 +17,7 @@ def poem_plot_emotion_evolution(df, default_emotion="amusement", color_scale="Pl
                 'chunk': idx,
                 'emotion': emotion,
                 'score': score
+                #'line_text': line_text
             })
 
     emotion_df = pd.DataFrame(emotion_records)
@@ -42,6 +45,8 @@ def poem_plot_emotion_evolution(df, default_emotion="amusement", color_scale="Pl
             y=emotion_data["score"],
             mode="lines+markers",
             name=emotion,
+            #text=emotion_data["line_text"],
+            #hovertemplate="<b>%{text}</b><br>Emotion: %{y:.2f}<br>Chunk: %{x}",
             line=dict(shape="spline", width=2, color=emotion_colors[emotion]),
             marker=dict(size=5),
             visible=True  # Alle Emotionen standardmäßig sichtbar
