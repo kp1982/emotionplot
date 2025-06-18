@@ -23,7 +23,8 @@ from textblob import download_corpora
 
 from nrclex import NRCLex
 import re
-from utils import text_to_latex, latex_to_paragraph_dataframe
+from utils import text_to_latex, latex_to_paragraph_dataframe, get_emotion
+
 
 import corpora
 
@@ -745,13 +746,22 @@ elif st.session_state.page == "plot_poem":
         if st.session_state.get("poem_emotion_data") is not None:
             try:
                 # --- ADAPTED DATAFRAME CREATION ---
-                df1 = pd.DataFrame(poem_data)
-                df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())
-                emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)
-                emotions_df["chunk"] = emotions_df.index
+                df_poem = pd.DataFrame(poem_data)
+                df_poem_other_model = pd.DataFrame.from_records(df_poem["emotions"].to_list())
+                is_poem = "line_text" in df_poem_other_model.columns
+
+                # Build emotion score DataFrame
+                poems_emotions_df = df_poem_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)
+
+                # Attach line text (for poems) or fallback chunk
+                if is_poem:
+                    poems_emotions_df["chunk"] = df_poem_other_model["line_text"]
+                else:
+                    poems_emotions_df["chunk"] = df_poem_other_model["chunk"]
+
 
                 poem_plot_stacked_emotions(
-                    emotions_df,
+                    poems_emotions_df,
                     group_size=chunks_interactive,
                     color_scale=color_scale_interactive
                 )
@@ -762,20 +772,10 @@ elif st.session_state.page == "plot_poem":
             st.info("Please upload a JSON file to see the plot.")
 
 
-
-
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
         st.subheader("☁️ Emotion Wordcloud")
 
-        #max_words = st.slider(
-        #    "Number of words in the Wordcloud:",
-        #    #min_value=100,
-        #    #max_value=000,
-        #    value=100,
-        #    step=10,
-        #    key="max_words_wc"
-        #)
         with st.sidebar:
             st.subheader("Wordcloud Settings")
             background_color = st.selectbox(
@@ -795,11 +795,17 @@ elif st.session_state.page == "plot_poem":
                 available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
 
                 # Define target emotions
-                target_emotions = {'anger', 'fear', 'surprise', 'sadness', 'joy', 'disgust'}
+                #target_emotions = {'anger', 'fear', 'surprise', 'sadness', 'joy', 'disgust'}
 
+                #filtered_emotions = [entry for entry in emotions_list if entry.get("Predicted_Emotion") in target_emotions]
+                #available_emotions2 = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list if entry.get("Predicted_Emotion") not in ["neutral", "unknown"]))
 
-                filtered_emotions = [entry for entry in emotions_list if entry.get("Predicted_Emotion") in target_emotions]
-                available_emotions2 = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in filtered_emotions))
+                # Show all available emotions (excluding neutral/unknown)
+                available_emotions2 = sorted(set(
+                    get_emotion(entry)
+                    for entry in emotions_list
+                    if get_emotion(entry) not in ["neutral", "unknown"]
+))
 
                 # Select emotion to filter by
                 with st.sidebar:
@@ -807,7 +813,7 @@ elif st.session_state.page == "plot_poem":
 
                 # Step 2: Filter entriess
                 if selected_emotion != "All":
-                    emotions_list = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
+                    emotions_list = [entry for entry in emotions_list if get_emotion(entry) == selected_emotion]
 
 
                 # Step 3: Combine all 'chunk' texts into one string
@@ -988,7 +994,7 @@ elif st.session_state.page == "plot_poem":
         else:
             st.markdown(f"**Showing {min(num_examples, len(filtered))} example sentences for _{selected_emotion}_:**")
             for i, entry in enumerate(filtered[:num_examples]):
-                st.markdown(f"> {entry.get('chunk', '').strip()}")
+                st.markdown(f"> {entry.get('line_text', '').strip()}")
 
         with st.sidebar:
             st.subheader("Want to get book reccomendations?")

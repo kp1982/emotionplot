@@ -64,11 +64,11 @@ def poem_plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False,
                     y=grouped[emotion],
                     name=emotion,
                     marker_color=color,
-                    customdata=grouped["chunk"].values,
+                    customdata = list(zip(grouped["chunk"].values)),
                     hovertemplate=(
                         "<b>Emotion:</b> %{fullData.name}<br>" +
                         "<b>Emotion Score:</b> %{y:.2f}<br>" +
-                        "<b>Chunk Text:</b><br>%{customdata[0]}<extra></extra>"
+                        "<b>Line Text:</b><br>%{customdata[0]}<extra></extra>"
                     ),
                     visible=True if emotion in default_visible else "legendonly"
                 )

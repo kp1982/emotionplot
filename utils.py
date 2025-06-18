@@ -75,3 +75,6 @@ def get_cover_url(book_id: str):
     except:
         pass
     return "https://via.placeholder.com/120x180.png?text=No+Cover"
+
+def get_emotion(entry):
+    return entry.get("Predicted_Emotion") or entry.get("predicted_emotion") or "unknown"
