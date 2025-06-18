@@ -599,9 +599,6 @@ elif st.session_state.page == "plot_novel":
         plot_emotion_frequency(df1, bar_color=bar_color)
 
 
-
-
-
     # === Emotion Mean Curve Plot ===
 
     elif selected_plot == "Curve":
@@ -699,6 +696,7 @@ elif st.session_state.page == "plot_novel":
 elif st.session_state.page == "plot_poem":
     st.title("📝 Step 2: Explore the emotions in your poem")
     st.write("Dive into your poem’s emotional landscape. Choose a visualization to see how different feelings ebb and flow through the lines.")
+    st.write("💡 We chunked your text input line by line, using the line breaks from the pasted text. **By default, one chunk equals one line.**")
 
     # 👉 Show sidebar menu only if file_data is present
     if st.session_state.get("poem_emotion_data") is not None:
@@ -775,7 +773,7 @@ elif st.session_state.page == "plot_poem":
             with st.sidebar:
                 #st.subheader("Interactive Plot Settings")
                 chunks_interactive = st.number_input(
-                    "How many groups sentences do you want to be displayed?",
+                    "How many grouped line(s) do you want to be displayed?",
                     min_value=1,
                     max_value=100,
                     value=1,
@@ -1015,17 +1013,17 @@ elif st.session_state.page == "plot_poem":
         with st.sidebar:
             #st.subheader("🔍 Emotion Example Settings")
             selected_emotion = st.selectbox("Select an emotion:", available_emotions)
-            num_examples = st.slider("Number of example sentences:", min_value=1, max_value=5, value=3, step=1)
+            num_examples = st.slider("Number of example line(s):", min_value=1, max_value=5, value=3, step=1)
 
         # Filter for selected emotion
         filtered = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
 
         # Show max number of available examples for this emotion in the sidebar
         with st.sidebar:
-            st.info(f"Maximum number of sentences for _{selected_emotion}_ is {len(filtered)}.")
+            st.info(f"Maximum number of line(s) for _{selected_emotion}_ is {len(filtered)}.")
 
         if not filtered:
-            st.warning("No sentences found for this emotion.")
+            st.warning("No line(s) found for this emotion.")
         else:
             st.markdown(f"**Showing {min(num_examples, len(filtered))} example sentences for _{selected_emotion}_:**")
             for i, entry in enumerate(filtered[:num_examples]):

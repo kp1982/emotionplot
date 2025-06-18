@@ -81,7 +81,7 @@ def poem_plot_stacked_emotions(emotions_df, group_size=1, exclude_neutral=False,
         barmode='stack',
         #title="Stacked Emotion Scores per Chunk",
         xaxis=dict(
-            title=f"{group_size} sentences per chunk",
+            title=f"{group_size} line(s) per chunk",
             rangeslider=dict(visible=True),
             type="linear",
             range=[min_x, max_x],
