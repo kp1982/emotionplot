@@ -59,6 +59,16 @@ friendly_plot_labels = {
 }
 plot_options_display = list(friendly_plot_labels.values())
 
+st.markdown("""
+<style>
+/* Fix uneven alignment of radio options in horizontal layout */
+section[data-testid="stRadio"] label {
+    white-space: nowrap;
+    padding-right: 1.5rem;
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # Page 0 – Selection of text type
 if st.session_state.page == "start":
@@ -79,49 +89,40 @@ if st.session_state.page == "start":
 
 
 
-# Page 1 – Novel Input
+# --- INIT SESSION STATE ---
 if "page" not in st.session_state:
     st.session_state.page = "input"
 if "confirm_clicked" not in st.session_state:
     st.session_state.confirm_clicked = False
 
-# Page 1 – URL novel_input
-if "page" not in st.session_state:
-    st.session_state.page = "input"
-if "confirm_clicked" not in st.session_state:
-    st.session_state.confirm_clicked = False
-
-# Page 1 – URL novel_input
+# --- PAGE: Novel Input ---
 if st.session_state.page == "novel_input":
     st.title("📖 Step 1: Paste Your Novel Link")
-    st.write("Paste a URL from **Project Gutenberg** or another online source. We'll fetch the text and analyze its emotions.")
 
-    # st.write("Please enter the URL:")
 
-    url = st.text_input("Enter the URL of the novel/text:")
-
-    # Show funny GIF only before confirm
+    # === CASE 1: Before confirmation ===
     if not st.session_state.confirm_clicked:
+        st.write("Paste a URL from **Project Gutenberg** or another online source. We'll fetch the text and analyze its emotions.")
+        url = st.text_input("Enter the URL of the novel/text:")
         st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
 
-    # Handle Confirm button
-    if st.button("Confirm"):
-        if url:
-            st.session_state.confirm_clicked = True
-            st.session_state.url = url
-            st.rerun()
-        else:
-            st.error("Please enter a valid URL.")
+        if st.button("Confirm"):
+            if url.strip():
+                st.session_state.confirm_clicked = True
+                st.session_state.url = url.strip()
+                st.rerun()
+            else:
+                st.error("Please enter a valid URL.")
 
-    # ✅ After confirmation – fetch data and show book info
-    if st.session_state.confirm_clicked and url and "file_data" not in st.session_state:
-        # Actual API request
+    # === CASE 2: Spinner while fetching ===
+    elif "file_data" not in st.session_state:
+
         with st.spinner("🔄 Analyzing text and extracting emotions..."):
             try:
                 response = requests.get(
                     "https://emotionplot-api-znpzhhue6a-ew.a.run.app/analyze",
                     params={
-                        "url": url,
+                        "url": st.session_state.url,
                         "sentences_per_chunk": 5,
                         "model": "accurate",
                     },
@@ -130,57 +131,49 @@ if st.session_state.page == "novel_input":
                 response.raise_for_status()
                 data = response.json()
                 st.session_state.file_data = data
-                st.session_state.url = url
-
-                # Update progress bar
-                progress_bar = st.progress(100)
-                status_text = st.empty()
-                status_text.text("✅ Done!")
-
-
-                # Fetch metadata
-                try:
-                    book_id = url.strip("/").split("/")[-1]
-                    meta_url = f"https://gutendex.com/books/{book_id}"
-                    meta_response = requests.get(meta_url)
-                    meta_response.raise_for_status()
-                    metadata = meta_response.json()
-
-                    book_title = metadata.get("title", "Unknown Title")
-                    authors = metadata.get("authors", [])
-                    author_name = authors[0]["name"] if authors else "Unknown Author"
-                    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
-
-                    # Display book info and cover side by side (only once)
-                    info_col, cover_col = st.columns([2, 1])
-                    with info_col:
-                        st.write(f"📖 {book_title}")
-                        st.write(f"✍️ {author_name}")
-                    with cover_col:
-                        st.image(cover_url, width=150)
-
-                except Exception:
-                    status_text.text("✅ Done!")
-
+                st.success("✅ Done analyzing your novel!")
             except requests.exceptions.RequestException as e:
                 st.error(f"❌ API request failed: {e}")
+                st.session_state.confirm_clicked = False
+                st.stop()
+        st.rerun()
 
-    # Next button
-    if "file_data" in st.session_state:
+    # === CASE 3: After success ===
+    elif "file_data" in st.session_state:
+        st.success("✅ Done analyzing your novel!")
+
+        try:
+            url = st.session_state.url
+            book_id = url.strip("/").split("/")[-1]
+            meta_url = f"https://gutendex.com/books/{book_id}"
+            meta_response = requests.get(meta_url)
+            meta_response.raise_for_status()
+            metadata = meta_response.json()
+            title = metadata.get("title", "Unknown Title")
+            authors = metadata.get("authors", [])
+            author = authors[0]["name"] if authors else "Unknown Author"
+            cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+
+            info_col, cover_col = st.columns([2, 1])
+            with info_col:
+                st.write(f"📖 {title}")
+                st.write(f"✍️ {author}")
+            with cover_col:
+                st.image(cover_url, width=150)
+
+        except Exception:
+            st.write("📖 Unknown Title")
+            st.write("✍️ Unknown Author")
+
+        # Navigation buttons
         if st.button("🚀 Go to plots"):
-            st.session_state.page = "plot_novel" ###### --- EDIT: changed to 'plot_novel' ---
-            st.rerun()
-        # Show Get Similar Books button
-        if st.button("📚 Get Similar Books"):
-            st.session_state.page = "recommend_books"  # set page to 'recommend_books' to show recommendations page
-            st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
+            st.session_state.page = "plot_novel"
             st.rerun()
 
-        ## additional button to start over
-        # if st.button("🔄 Start Over"):
-        #     for key in ["file_data", "emotions", "recommend_clicked", "recommendations"]:
-        #         st.session_state.pop(key, None)
-        #     st.rerun()
+        if st.button("📚 Get Similar Books"):
+            st.session_state.page = "recommend_books"
+            st.session_state.recommend_clicked = True
+            st.rerun()
 
 # Fetch recommendations if requested
 if st.session_state.get("recommend_clicked") and "recommendations" not in st.session_state:
@@ -223,7 +216,7 @@ if st.session_state.page == "poem_input":
         )
 
         # Fun GIF
-        st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
+        # st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
 
         if st.button("Confirm"):
             if poem_text.strip():
@@ -261,7 +254,11 @@ if st.session_state.page == "poem_input":
     elif st.session_state.get("poem_emotion_data"):
         st.success("✅ Done analyzing your poem!")
 
-        st.markdown("#### 📄 Your Submitted Poem:")
+        st.markdown("""
+            <div style="margin-bottom: 0.25rem; font-size: 1.2rem;">
+            📄 <strong>Your Submitted Poem:</strong>
+            </div>
+            """, unsafe_allow_html=True)
         st.markdown("""
             <style>
             .scrollable-code {
@@ -362,9 +359,20 @@ elif st.session_state.page == "plot_novel":
 
     # Plot selection menu
     st.subheader("📋 Select Output Type")
-    selected_friendly_name = st.radio("📋 Select a visualization", options=plot_options_display, horizontal=True, key="novel_plot_selector")
+    selected_friendly_name = st.radio(
+        "📋 Select a visualization",
+        options=plot_options_display,
+        horizontal=True,
+        key="novel_plot_selector"
+        )
+    selected_plot = next(
+        (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
+    None
+)
+    if selected_plot is None:
+        st.error("⚠️ Could not match selected plot option.")
+        st.stop()
 
-    selected_plot = next(k for k, v in friendly_plot_labels.items() if v == selected_friendly_name)
     st.divider()
 
 
@@ -380,8 +388,14 @@ elif st.session_state.page == "plot_novel":
 
 
     if selected_plot == "Interactive Plot":
-        selected_friendly_name = st.radio("📋 Select a visualization", options=plot_options_display, horizontal=True, key="novel_plot_selector")
-        selected_plot = next(k for k, v in friendly_plot_labels.items() if v == selected_friendly_name)
+        selected_plot = next(
+            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
+        None
+)
+    if selected_plot is None:
+        st.error("⚠️ Could not match selected plot option.")
+        st.stop()
+
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
         with st.sidebar:
             st.subheader("Interactive Plot Settings")
@@ -461,8 +475,14 @@ elif st.session_state.page == "plot_novel":
 
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
-        selected_friendly_name = st.radio("📋 Select a visualization", options=plot_options_display, horizontal=True, key="novel_plot_selector")
-        selected_plot = next(k for k, v in friendly_plot_labels.items() if v == selected_friendly_name)
+        selected_plot = next(
+            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
+        None
+)
+        if selected_plot is None:
+            st.error("⚠️ Could not match selected plot option.")
+            st.stop()
+
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
 
         with st.sidebar:
@@ -568,8 +588,14 @@ elif st.session_state.page == "plot_novel":
     # === Emotions  Barplot ===
 
     elif selected_plot == "Barplot":
-        selected_friendly_name = st.radio("📋 Select a visualization", options=plot_options_display, horizontal=True, key="novel_plot_selector")
-        selected_plot = next(k for k, v in friendly_plot_labels.items() if v == selected_friendly_name)
+        selected_plot = next(
+            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
+        None
+)
+    if selected_plot is None:
+        st.error("⚠️ Could not match selected plot option.")
+        st.stop()
+
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
 
         with st.sidebar:
@@ -605,9 +631,15 @@ elif st.session_state.page == "plot_novel":
     # === Emotion Mean Curve Plot ===
 
     elif selected_plot == "Curve":
-        selected_friendly_name = st.radio("📋 Select a visualization", options=plot_options_display, horizontal=True, key="novel_plot_selector")
 
-        selected_plot = next(k for k, v in friendly_plot_labels.items() if v == selected_friendly_name)
+        selected_plot = next(
+            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
+        None
+)
+        if selected_plot is None:
+            st.error("⚠️ Could not match selected plot option.")
+            st.stop()
+
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
 
         # Sidebar settings for color scale
@@ -643,9 +675,15 @@ elif st.session_state.page == "plot_novel":
     # === Example sentences per emotion ===
 
     elif selected_plot == "Emotion Examples":
-        selected_friendly_name = st.radio("📋 Select a visualization", options=plot_options_display, horizontal=True, key="novel_plot_selector")
 
-        selected_plot = next(k for k, v in friendly_plot_labels.items() if v == selected_friendly_name)
+        selected_plot = next(
+            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
+        None
+)
+        if selected_plot is None:
+            st.error("⚠️ Could not match selected plot option.")
+            st.stop()
+
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
 
         # Extract emotion data
@@ -739,10 +777,22 @@ elif st.session_state.page == "plot_poem":
         st.error("No data source found. Please go back and enter a URL.")
 
 
-    # Plot selection menu
-    selected_friendly_name = st.radio("📋 Select a visualization", options=plot_options_display, horizontal=True, key="poem_plot_selector")
+    # Plot selection menu for poem
+    selected_friendly_name = st.radio(
+        "📋 Select a visualization",
+        options=plot_options_display,
+        #horizontal=True,
+        key="poem_plot_selector"
+    )
 
-    selected_plot = next(k for k, v in friendly_plot_labels.items() if v == selected_friendly_name)
+    selected_plot = next(
+        (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
+        None
+)
+    if selected_plot is None:
+        st.error("⚠️ Could not match selected plot option.")
+        st.stop()
+
     st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
     st.divider()
 
