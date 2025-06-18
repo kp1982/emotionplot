@@ -72,9 +72,26 @@ section[data-testid="stRadio"] label {
 
 # Page 0 – Selection of text type
 if st.session_state.page == "start":
-    st.title("📚 Welcome to Emotionplot")
-    st.write("Explore the emotional dynamics of literary texts. Select whether you want to analyze a poem or a novel to get started.")
+    st.title("📚 Welcome to EmotionPlot")
 
+    # Animated loading effect
+   # with st.spinner("Loading EmotionPlot..."):
+    #    time.sleep(2)  # Simulating a short delay
+
+    # Progress bar animation
+    progress_bar = st.progress(0)
+    for percent_complete in range(100):
+        time.sleep(0.0001)
+        progress_bar.progress(percent_complete + 1)
+
+    # Introduction Section
+    st.markdown(
+        """
+        ### Discover the Emotions Behind the Words 🎭✨
+""",
+        unsafe_allow_html=True
+    )
+    # User Selection
     col1, col2 = st.columns(2)
     with col1:
         if st.button("📖 My input is a novel"):
@@ -86,6 +103,22 @@ if st.session_state.page == "start":
             st.session_state.input_type = "poem"
             st.session_state.page = "poem_input"
             st.rerun()
+
+    st.markdown(
+        """
+        Have you ever wondered how a book or poem *feels* at its core? Whether it carries waves of **joy, sorrow, excitement, or mystery**?
+
+        **EmotionPlot** helps you uncover the emotional journey of any text in a visually engaging way. If you want to analyze a poem, simply **paste text**. If you want to analyze a novel, **enter a book link**, and let the magic begin!
+
+        Whether you're an **avid reader, a writer, or just curious** about how emotions shape literature, EmotionPlot is here to bring stories to life in a whole new way.
+        **Choose your text type to begin!** 📖
+        """,
+        unsafe_allow_html=True
+    )
+
+
+
+
 
 
 
@@ -102,7 +135,7 @@ if st.session_state.page == "novel_input":
 
     # === CASE 1: Before confirmation ===
     if not st.session_state.confirm_clicked:
-        st.write("Paste a URL from **Project Gutenberg** or another online source. We'll fetch the text and analyze its emotions.")
+        st.write("Paste a URL from [**Project Gutenberg**](https://www.gutenberg.org/ebooks/). We'll fetch the text and analyze its emotions.")
         url = st.text_input("Enter the URL of the novel/text:")
         st.image("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZjNWw3cHkxOXZ5dDRzZWMxbThwZ3ZiNXJhOW5jZnJudTloOWY1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QPQ3xlJhqR1BXl89RG/giphy.gif")
 
