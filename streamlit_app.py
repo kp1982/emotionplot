@@ -276,11 +276,14 @@ if st.session_state.page == "poem_input":
             .scrollable-code {
                 max-height: 300px;
                 overflow-y: auto;
-                background-color: #0e1117;
                 padding: 1rem;
                 border-radius: 0.5rem;
                 font-family: monospace;
                 white-space: pre-wrap;
+
+                background-color: var(--background-secondary);
+                color: var(--text-color);
+                border: 1px solid var(--block-border-color);
             }
             </style>
         """, unsafe_allow_html=True)
@@ -442,26 +445,6 @@ elif st.session_state.page == "plot_novel":
             )
         except Exception as e:
             st.error(f"Error while plotting: {e}")
-
-        # === Navigation Buttons (all stacked) ===
-        st.markdown("---")
-        if st.button("📚 Get Similar Books"):
-            st.session_state.page = "recommend_books"
-            st.session_state.recommend_clicked = True
-            st.rerun()
-
-        if st.button("📖 Enter Another Novel"):
-            st.session_state.clear()
-            st.session_state.page = "novel_input"
-            st.session_state.input_type = "novel"
-            st.rerun()
-
-        if st.button("📝 Submit a Poem"):
-            st.session_state.clear()
-            st.session_state.page = "poem_input"
-            st.session_state.input_type = "poem"
-            st.rerun()
-
 
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
