@@ -947,7 +947,7 @@ elif st.session_state.page == "plot_poem":
             color_scale_curve = color_scale_options[color_scale_label]
 
 
-            st.subheader("Want to get book reccomendations? TEST")
+            st.subheader("Want to get book reccomendations?")
             if st.button("📚 Get Similar Books"):
                 st.session_state.page = "recommend_books"
                 st.session_state.recommend_clicked = True  # trigger recommendations fetch if needed
