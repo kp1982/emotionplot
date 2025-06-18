@@ -657,20 +657,20 @@ elif st.session_state.page == "plot_novel":
         with st.sidebar:
             st.subheader("🔧 Settings Menu")
             selected_emotion = st.selectbox("Select an emotion:", available_emotions)
-            num_examples = st.slider("Number of example sentences:", min_value=1, max_value=5, value=3, step=1)
+            #num_examples = st.slider("Number of example sentences:", min_value=1, max_value=5, value=3, step=1)
 
         # Filter for selected emotion
         filtered = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
 
         # Show max number of available examples for this emotion in the sidebar
         with st.sidebar:
-            st.info(f"Maximum number of sentences for _{selected_emotion}_ is {len(filtered)}.")
+            st.info(f"Maximum number of sentences for _{selected_emotion}_ is {len(filtered)} (showing up to 5).")
 
         if not filtered:
             st.warning("No sentences found for this emotion.")
         else:
-            st.markdown(f"**Showing {min(num_examples, len(filtered))} example sentences for _{selected_emotion}_:**")
-            for i, entry in enumerate(filtered[:num_examples]):
+            st.markdown(f"**Showing {min(5, len(filtered))} example sentences for _{selected_emotion}_ (where it was classified as the main emotion):**")
+            for i, entry in enumerate(filtered[:5]):
                 st.markdown(f"> {entry.get('chunk', '').strip()}")
 
         with st.sidebar:
@@ -1013,20 +1013,19 @@ elif st.session_state.page == "plot_poem":
         with st.sidebar:
             #st.subheader("🔍 Emotion Example Settings")
             selected_emotion = st.selectbox("Select an emotion:", available_emotions)
-            num_examples = st.slider("Number of example line(s):", min_value=1, max_value=5, value=3, step=1)
 
         # Filter for selected emotion
         filtered = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
 
         # Show max number of available examples for this emotion in the sidebar
         with st.sidebar:
-            st.info(f"Maximum number of line(s) for _{selected_emotion}_ is {len(filtered)}.")
+            st.info(f"Maximum number of line(s) for _{selected_emotion}_ is {len(filtered)} (showing up to 5).")
 
         if not filtered:
-            st.warning("No line(s) found for this emotion.")
+            st.warning("No lines found for this emotion.")
         else:
-            st.markdown(f"**Showing {min(num_examples, len(filtered))} example sentences for _{selected_emotion}_:**")
-            for i, entry in enumerate(filtered[:num_examples]):
+            st.markdown(f"**Showing {min(5, len(filtered))} example sentences for _{selected_emotion}_ (where it was classified as the main emotion):**")
+            for i, entry in enumerate(filtered[:5]):
                 st.markdown(f"> {entry.get('line_text', '').strip()}")
 
         with st.sidebar:
@@ -1041,7 +1040,9 @@ elif st.session_state.page == "plot_poem":
 #### Page 4: Recommendations
 if st.session_state.page == "recommend_books":
     st.title("📚 Recommended Books")
+    st.write("*Our recommendations improve as more novels are added, so keep coming back, uploading, and exploring our library.*")
     st.write("Here are some books similar to the one you analyzed:")
+
 
     if st.session_state.get("file_data") is not None:
         with st.sidebar:
@@ -1053,7 +1054,7 @@ if st.session_state.page == "recommend_books":
 
     if "recommendations" in st.session_state:
         with st.sidebar:
-            if st.button("Go to Plots"):
+            if st.button("🚀 Go to Plots"):
                 st.session_state.page = "plot_novel"
                 st.rerun()
             #st.markdown("Click below to return to start.")
