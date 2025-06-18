@@ -63,7 +63,7 @@ plot_options_display = list(friendly_plot_labels.values())
 # Page 0 – Selection of text type
 if st.session_state.page == "start":
     st.title("📚 Welcome to Emotionplot")
-    st.write("Uncover the emotional journey in literature. Choose your type of text to begin: TEST")
+    st.write("Uncover the emotional journey in literature. Choose your type of text to begin:")
 
     col1, col2 = st.columns(2)
     with col1:
