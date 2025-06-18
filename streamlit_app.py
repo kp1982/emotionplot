@@ -788,6 +788,7 @@ elif st.session_state.page == "plot_poem":
         if st.session_state.get("poem_emotion_data") is not None:
             try:
                 # Step 1: Extract the list of emotion entries
+                poem_data = st.session_state.poem_emotion_data
                 emotions_list = poem_data.get("emotions", [])
 
                 # :mag: Get list of all unique dominant emotions
@@ -808,8 +809,10 @@ elif st.session_state.page == "plot_poem":
                 if selected_emotion != "All":
                     emotions_list = [entry for entry in emotions_list if entry.get("Predicted_Emotion") == selected_emotion]
 
+
                 # Step 3: Combine all 'chunk' texts into one string
-                all_text = " ".join(entry.get("chunk", "") for entry in emotions_list)
+                all_text = " ".join(entry.get("line_text", "") for entry in emotions_list)
+
 
                 # Step 4: Tokenize and count word frequencies
                 stopwords =  ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as",
@@ -827,7 +830,9 @@ elif st.session_state.page == "plot_poem":
                               "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll",
                               "you're", "you've", "your", "yours", "yourself", "yourselves"]
 
-                words = re.findall(r"\b[a-z]{3,}\b", all_text.lower())
+                # words = re.findall(r"\b[a-z]{3,}\b", all_text.lower())
+                words = re.findall(r"\b\w{3,}\b", all_text)
+
 
                 # Use NRCLex to determine emotional words
                 emotional_words = [word for word in words if NRCLex(word).affect_list]
