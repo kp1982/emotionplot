@@ -131,7 +131,7 @@ if st.session_state.page == "novel_input":
                 response.raise_for_status()
                 data = response.json()
                 st.session_state.file_data = data
-                st.success("✅ Done analyzing your novel!")
+                #st.success("✅ Done analyzing your novel!")
             except requests.exceptions.RequestException as e:
                 st.error(f"❌ API request failed: {e}")
                 st.session_state.confirm_clicked = False
@@ -173,6 +173,18 @@ if st.session_state.page == "novel_input":
         if st.button("📚 Get Similar Books"):
             st.session_state.page = "recommend_books"
             st.session_state.recommend_clicked = True
+            st.rerun()
+
+        if st.button("📖 Submit Another Novel"):
+            for key in ["file_data", "url", "confirm_clicked"]:
+                st.session_state.pop(key, None)
+            st.session_state.page = "novel_input"
+            st.rerun()
+
+        if st.button("📝 Submit a Poem Instead"):
+            st.session_state.clear()
+            st.session_state.page = "poem_input"
+            st.session_state.input_type = "poem"
             st.rerun()
 
 # Fetch recommendations if requested
@@ -305,56 +317,45 @@ if st.session_state.page == "poem_input":
             st.rerun()
 
 
-
-
-
 #################################################
 # Page 3 – Plot Output Novel
 #################################################
 elif st.session_state.page == "plot_novel":
     st.title("📖 Step 2: Explore the Emotions of the Novel")
-    st.write("Choose a visualization below to see how emotions unfold in your text.")
+    # st.write("Choose a visualization below to see how emotions unfold in your text.")
 
-    # 👉 Show sidebar menu only if file_data is present
-    if st.session_state.get("file_data") is not None:
-        with st.sidebar:
-            st.header("🔧 Settings Menu")
-            #st.markdown("Use the sidebar to navigate or adjust plot settings.")
-
-    else:
+    if st.session_state.get("file_data") is None:
         st.error("No data source found. Please go back and enter a URL.")
+        st.stop()
 
-    if st.session_state.get("file_data") is not None:
-        novel_data = st.session_state.file_data  #Load saved data from session state
 
-        if st.session_state.get("url"):
-            url = st.session_state.url
-            # Only fetch Gutenberg metadata if URL is from gutenberg.org
-            if "gutenberg.org" in url:
-                try:
-                    book_id = url.strip("/").split("/")[-1]
-                    meta_url = f"https://gutendex.com/books/{book_id}"
-                    response = requests.get(meta_url)
-                    response.raise_for_status()
-                    metadata = response.json()
-                    book_title = metadata.get("title", "Unknown Title")
-                    authors = metadata.get("authors", [])
-                    author_name = authors[0]["name"] if authors else "Unknown Author"
-                    #cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+    novel_data = st.session_state.file_data  #Load saved data from session state
 
+    if st.session_state.get("url"):
+        url = st.session_state.url
+        # Only fetch Gutenberg metadata if URL is from gutenberg.org
+        if "gutenberg.org" in url:
+            try:
+                book_id = url.strip("/").split("/")[-1]
+                meta_url = f"https://gutendex.com/books/{book_id}"
+                response = requests.get(meta_url)
+                response.raise_for_status()
+                metadata = response.json()
+                book_title = metadata.get("title", "Unknown Title")
+                authors = metadata.get("authors", [])
+                author_name = authors[0]["name"] if authors else "Unknown Author"
+                #cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+
+                info_col, cover_col = st.columns([2, 1])
+                with info_col:
                     st.write(f"📖 {book_title}")
                     st.write(f"✍️ {author_name}")
-                    #st.image(cover_url, width=200)
-                except Exception:
-                    st.write("📖 Unknown Title")
-                    st.write("✍️ Unknown Author")
-            else:
-                st.write("📖 Poem or non-Gutenberg text")
-
-    else:
-        st.error("No data source found. Please go back and enter a URL.")
-
-
+                #with cover_col:
+                #    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
+                #    st.image(cover_url, width=150)
+            except Exception:
+                st.write("📖 Unknown Title")
+                st.write("✍️ Unknown Author")
 
 
     # Plot selection menu
@@ -362,19 +363,18 @@ elif st.session_state.page == "plot_novel":
     selected_friendly_name = st.radio(
         "📋 Select a visualization",
         options=plot_options_display,
-        horizontal=True,
+        #horizontal=True,
         key="novel_plot_selector"
-        )
+    )
     selected_plot = next(
         (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
-    None
-)
+        None
+    )
     if selected_plot is None:
         st.error("⚠️ Could not match selected plot option.")
         st.stop()
 
     st.divider()
-
 
     # === Interactive Plot ===
 
@@ -388,17 +388,10 @@ elif st.session_state.page == "plot_novel":
 
 
     if selected_plot == "Interactive Plot":
-        selected_plot = next(
-            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
-        None
-)
-    if selected_plot is None:
-        st.error("⚠️ Could not match selected plot option.")
-        st.stop()
-
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
+
         with st.sidebar:
-            st.subheader("Interactive Plot Settings")
+            st.subheader("🔧 Settings Menu")
             chunks_interactive = st.number_input(
                 "How many groups sentences do you want to be displayed?",
                 min_value=1,
@@ -407,18 +400,6 @@ elif st.session_state.page == "plot_novel":
                 step=1,
                 key="chunks_interactive"
             )
-
-            # Map user-friendly names to Plotly templates
-            # template_options = {
-            #     "Dark Mode": "plotly_dark",
-            #     "White Mode": "simple_white"
-            # }
-            # template_interactive_label = st.selectbox(
-            #     "Choose a plot template:",
-            #     options=list(template_options.keys()),
-            #     key="template_interactive"
-            # # )
-            # template_interactive = template_options[template_interactive_label]
 
             # Only color scale selection remains
             color_scale_options = {
@@ -438,7 +419,7 @@ elif st.session_state.page == "plot_novel":
             )
             color_scale_interactive = color_scale_options[color_scale_label]
 
-            st.subheader("Want to get book reccomendations?")
+            st.subheader("Want to get book recommendations?")
             if st.button("📚 Get Similar Books"):
                 st.session_state.page = "recommend_books"
                 st.session_state.recommend_clicked = True
@@ -449,44 +430,45 @@ elif st.session_state.page == "plot_novel":
                 st.session_state.clear()
                 st.rerun()
 
+        try:
+            df1 = pd.DataFrame(novel_data)
+            df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())
+            emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)
+            emotions_df["chunk"] = emotions_df.index
+            plot_stacked_emotions(
+                emotions_df,
+                group_size=chunks_interactive,
+                color_scale=color_scale_interactive
+            )
+        except Exception as e:
+            st.error(f"Error while plotting: {e}")
 
+        # === Navigation Buttons (all stacked) ===
+        st.markdown("---")
+        if st.button("📚 Get Similar Books"):
+            st.session_state.page = "recommend_books"
+            st.session_state.recommend_clicked = True
+            st.rerun()
 
-        if st.session_state.get("file_data") is not None:
-            try:
-                # --- ADAPTED DATAFRAME CREATION ---
-                df1 = pd.DataFrame(novel_data)
-                df_other_model = pd.DataFrame.from_records(df1["emotions"].to_list())
-                emotions_df = df_other_model["Top_3_Emotions"].apply(pd.Series).fillna(0)
-                emotions_df["chunk"] = emotions_df.index
+        if st.button("📖 Enter Another Novel"):
+            st.session_state.clear()
+            st.session_state.page = "novel_input"
+            st.session_state.input_type = "novel"
+            st.rerun()
 
-                plot_stacked_emotions(
-                    emotions_df,
-                    group_size=chunks_interactive,
-                    color_scale=color_scale_interactive
-                )
-            except Exception as e:
-                st.error(f"Error while plotting: {e}")
-
-        else:
-            st.info("Please upload a JSON file to see the plot.")
-
-
+        if st.button("📝 Submit a Poem"):
+            st.session_state.clear()
+            st.session_state.page = "poem_input"
+            st.session_state.input_type = "poem"
+            st.rerun()
 
 
     # === Wordcloud ===
     elif selected_plot == "Wordcloud":
-        selected_plot = next(
-            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
-        None
-)
-        if selected_plot is None:
-            st.error("⚠️ Could not match selected plot option.")
-            st.stop()
-
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
 
         with st.sidebar:
-            st.subheader("Wordcloud Settings")
+            st.subheader("🔧 Settings Menu")
             background_color = st.selectbox(
             "Background color:",
             ["white", "black"],
@@ -588,18 +570,10 @@ elif st.session_state.page == "plot_novel":
     # === Emotions  Barplot ===
 
     elif selected_plot == "Barplot":
-        selected_plot = next(
-            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
-        None
-)
-    if selected_plot is None:
-        st.error("⚠️ Could not match selected plot option.")
-        st.stop()
-
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
 
         with st.sidebar:
-            st.subheader("Emotion Intensity Settings")
+            st.subheader("🔧 Settings Menu")
             # Let user pick a bar color
             bar_color = st.color_picker(
                 "Pick a bar color:",
@@ -631,20 +605,11 @@ elif st.session_state.page == "plot_novel":
     # === Emotion Mean Curve Plot ===
 
     elif selected_plot == "Curve":
-
-        selected_plot = next(
-            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
-        None
-)
-        if selected_plot is None:
-            st.error("⚠️ Could not match selected plot option.")
-            st.stop()
-
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
 
         # Sidebar settings for color scale
         with st.sidebar:
-            st.subheader("Emotional Shifts Settings")
+            st.subheader("🔧 Settings Menu")
             color_scale_options = {
                 "Vibrant": "Plotly",
                 "Cool": "Viridis",
@@ -662,6 +627,12 @@ elif st.session_state.page == "plot_novel":
             )
             color_scale_curve = color_scale_options[color_scale_label]
 
+            st.subheader("Want to get book recommendations?")
+            if st.button("📚 Get Similar Books"):
+                st.session_state.page = "recommend_books"
+                st.session_state.recommend_clicked = True
+                st.rerun()
+
             st.subheader("Ready to explore another text?")
             if st.button("🔁 Start Over"):
                 st.session_state.clear()
@@ -676,14 +647,6 @@ elif st.session_state.page == "plot_novel":
 
     elif selected_plot == "Emotion Examples":
 
-        selected_plot = next(
-            (k for k, v in friendly_plot_labels.items() if v == selected_friendly_name),
-        None
-)
-        if selected_plot is None:
-            st.error("⚠️ Could not match selected plot option.")
-            st.stop()
-
         st.subheader(friendly_plot_labels.get(selected_plot, selected_plot))
 
         # Extract emotion data
@@ -695,7 +658,7 @@ elif st.session_state.page == "plot_novel":
         available_emotions = sorted(set(entry.get("Predicted_Emotion", "unknown") for entry in emotions_list))
 
         with st.sidebar:
-            st.subheader("Emotion Example Settings")
+            st.subheader("🔧 Settings Menu")
             selected_emotion = st.selectbox("Select an emotion:", available_emotions)
             num_examples = st.slider("Number of example sentences:", min_value=1, max_value=5, value=3, step=1)
 
