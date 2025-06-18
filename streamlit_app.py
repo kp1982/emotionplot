@@ -73,7 +73,7 @@ section[data-testid="stRadio"] label {
 # Page 0 – Selection of text type
 if st.session_state.page == "start":
     st.title("📚 Welcome to Emotionplot")
-    st.write("Uncover the emotional journey in literature. Choose your type of text to begin:")
+    st.write("Explore the emotional dynamics of literary texts. Select whether you want to analyze a poem or a novel to get started.")
 
     col1, col2 = st.columns(2)
     with col1:
