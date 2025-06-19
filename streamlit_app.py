@@ -191,7 +191,7 @@ if st.session_state.page == "novel_input":
             with info_col:
                 st.markdown(
                     """
-                    <div style="width: 100%; background-color: #3a3a3a; color: #f0f0f0;
+                    <div style="width: 100%; background-color: var(--secondary-background-color); color: var(--text-color);
                     padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
                     font-size: 1rem;">
                     💡 We chunked your text input by sentences. <strong>By default, one chunk equals five sentences.</strong>
@@ -210,7 +210,7 @@ if st.session_state.page == "novel_input":
         except Exception:
             st.markdown(
                     """
-                    <div style="width: 100%; background-color: #3a3a3a; color: #f0f0f0;
+                    <div style="width: 100%; background-color: var(--secondary-background-color); color: var(--text-color);
                     padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
                     font-size: 1rem;">
                     💡 We chunked your text input by sentences. <strong>By default, one chunk equals five sentences.</strong>
@@ -411,7 +411,7 @@ elif st.session_state.page == "plot_novel":
                     st.write(f"✍️ {author_name}")
                     st.markdown(
                     """
-                    <div style="width: 100%; background-color: #3a3a3a; color: #f0f0f0;
+                    <div style="width: 100%; background-color: var(--secondary-background-color); color: var(--text-color);
                     padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
                     font-size: 1rem;">
                     💡 We chunked your text input by sentences. <strong>By default, one chunk equals five sentences.</strong>
@@ -427,7 +427,7 @@ elif st.session_state.page == "plot_novel":
                 st.write("✍️ Unknown Author")
                 st.markdown(
                     """
-                    <div style="width: 100%; background-color: #3a3a3a; color: #f0f0f0;
+                    <div style="width: 100%; background-color: var(--secondary-background-color); color: var(--text-color);
                     padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
                     font-size: 1rem;">
                     💡 We chunked your text input by sentences. <strong>By default, one chunk equals five sentences.</strong>
