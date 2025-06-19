@@ -380,7 +380,7 @@ if st.session_state.page == "poem_input":
 # Page 3 – Plot Output Novel
 #################################################
 elif st.session_state.page == "plot_novel":
-    st.title("📖 Step 2: Explore the Emotions of the Novel TEST")
+    st.title("📖 Step 2: Explore the Emotions of the Novel")
     # st.write("Choose a visualization below to see how emotions unfold in your text.")
 
     if st.session_state.get("file_data") is None:
