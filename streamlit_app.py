@@ -189,7 +189,18 @@ if st.session_state.page == "novel_input":
 
             info_col, cover_col = st.columns([2, 1])
             with info_col:
-                st.write("💡 We chunked your text input by sentences. **By default, one chunk equals five sentences.**")
+                st.markdown(
+                    """
+                    <div style="width: 100%; background-color: #3a3a3a; color: #f0f0f0;
+                    padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
+                    font-size: 1rem;">
+                    💡 We chunked your text input by sentences. <strong>By default, one chunk equals five sentences.</strong>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                    )
+
+
                 st.write(f"📖 {title}")
                 st.write(f"✍️ {author}")
 
@@ -197,7 +208,16 @@ if st.session_state.page == "novel_input":
                 st.image(cover_url, width=150)
 
         except Exception:
-            st.write("💡 We chunked your text input by sentences. **By default, one chunk equals five sentences.**")
+            st.markdown(
+                    """
+                    <div style="width: 100%; background-color: #3a3a3a; color: #f0f0f0;
+                    padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
+                    font-size: 1rem;">
+                    💡 We chunked your text input by sentences. <strong>By default, one chunk equals five sentences.</strong>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                    )
             st.write("📖 Unknown Title")
             st.write("✍️ Unknown Author")
 
@@ -389,14 +409,32 @@ elif st.session_state.page == "plot_novel":
                 with info_col:
                     st.write(f"📖 {book_title}")
                     st.write(f"✍️ {author_name}")
-                    st.write("💡 We chunked your text input by sentences. **By default, one chunk equals five sentences.**")
+                    st.markdown(
+                    """
+                    <div style="width: 100%; background-color: #3a3a3a; color: #f0f0f0;
+                    padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
+                    font-size: 1rem;">
+                    💡 We chunked your text input by sentences. <strong>By default, one chunk equals five sentences.</strong>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                    )
                 #with cover_col:
                 #    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
                 #    st.image(cover_url, width=150)
             except Exception:
                 st.write("📖 Unknown Title")
                 st.write("✍️ Unknown Author")
-                st.write("💡 We chunked your text input by sentences. **By default, one chunk equals five sentences.**")
+                st.markdown(
+                    """
+                    <div style="width: 100%; background-color: #3a3a3a; color: #f0f0f0;
+                    padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;
+                    font-size: 1rem;">
+                    💡 We chunked your text input by sentences. <strong>By default, one chunk equals five sentences.</strong>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                    )
 
 
     # Plot selection menu
