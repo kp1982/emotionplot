@@ -130,7 +130,7 @@ if "confirm_clicked" not in st.session_state:
 
 # --- PAGE: Novel Input ---
 if st.session_state.page == "novel_input":
-    st.title("📖 Step 1: Paste Your Novel Link TEST")
+    st.title("📖 Step 1: Paste Your Novel Link")
 
 
     # === CASE 1: Before confirmation ===
