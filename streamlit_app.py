@@ -72,7 +72,7 @@ section[data-testid="stRadio"] label {
 
 # Page 0 – Selection of text type
 if st.session_state.page == "start":
-    st.title("📚 Welcome to EmotionPlot")
+    st.title("📚 Welcome to EmotionPlot TEST")
 
     # Animated loading effect
    # with st.spinner("Loading EmotionPlot..."):
