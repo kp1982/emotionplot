@@ -106,9 +106,9 @@ if st.session_state.page == "start":
 
     st.markdown(
         """
-        Have you ever wondered how a book or poem *feels* at its core? Whether it carries waves of **joy, sorrow, excitement, or mystery**?
+        Have you ever wondered how a book or poem/ song *feels* at its core? Whether it carries waves of **joy, sorrow, excitement, or mystery**?
 
-        **EmotionPlot** helps you uncover the emotional journey of any text in a visually engaging way. If you want to analyze a poem, simply **paste text**. If you want to analyze a novel, **enter a book link**, and let the magic begin!
+        **EmotionPlot** helps you uncover the emotional journey of any text in a visually engaging way. If you want to analyze a poem/ song, simply **paste text**. If you want to analyze a novel, **enter a book link**, and let the magic begin!
 
         Whether you're an **avid reader, a writer, or just curious** about how emotions shape literature, EmotionPlot is here to bring stories to life in a whole new way.
         **Choose your text type to begin!** 📖
@@ -189,12 +189,15 @@ if st.session_state.page == "novel_input":
 
             info_col, cover_col = st.columns([2, 1])
             with info_col:
+                st.write("💡 We chunked your text input by sentences. **By default, one chunk equals five sentences.**")
                 st.write(f"📖 {title}")
                 st.write(f"✍️ {author}")
+
             with cover_col:
                 st.image(cover_url, width=150)
 
         except Exception:
+            st.write("💡 We chunked your text input by sentences. **By default, one chunk equals five sentences.**")
             st.write("📖 Unknown Title")
             st.write("✍️ Unknown Author")
 
@@ -242,12 +245,12 @@ if st.session_state.get("recommend_clicked") and "recommendations" not in st.ses
 
 # === Page 2: Poem Input ===
 if st.session_state.page == "poem_input":
-    st.title("📝 Step 1: Submit your poem")
+    st.title("📝 Step 1: Submit your poem/ song")
 
     # === CASE 1: Before confirmation ===
     if not st.session_state.get("confirm_clicked"):
         st.markdown("""
-        Paste your poem below to begin the emotional analysis.
+        Paste your poem/ song below to begin the emotional analysis.
         This works best for shorter, expressive texts.
 
         💡 *Tip: Free verse, spoken word, or lyrical stanzas all work great!*
@@ -255,7 +258,7 @@ if st.session_state.page == "poem_input":
 
         # Poem input
         poem_text = st.text_area(
-            "Enter your poem here:",
+            "Enter your poem/ song here:",
             height=300,
             key="poem_text_input"
         )
@@ -271,7 +274,7 @@ if st.session_state.page == "poem_input":
                 st.session_state.paragraph_df = latex_to_paragraph_dataframe(st.session_state.poem_latex)
                 st.rerun()
             else:
-                st.error("❌ Please paste your poem before continuing.")
+                st.error("❌ Please paste your poem/ song before continuing.")
 
     # === CASE 2: Spinner while fetching ===
     elif (
@@ -279,7 +282,7 @@ if st.session_state.page == "poem_input":
         and "poem_emotion_data" not in st.session_state
         and "emotion_analysis_failed" not in st.session_state
     ):
-        with st.spinner("🔄 Analyzing emotions in your poem..."):
+        with st.spinner("🔄 Analyzing emotions in your poem/ song..."):
             try:
                 response = requests.get(
                     "https://emotionplot-api-644268373090.europe-west1.run.app/analyze_poemlines/",
@@ -297,11 +300,11 @@ if st.session_state.page == "poem_input":
 
     # === CASE 3: After success ===
     elif st.session_state.get("poem_emotion_data"):
-        st.success("✅ Done analyzing your poem!")
+        st.success("✅ Done analyzing your poem/ song!")
 
         st.markdown("""
             <div style="margin-bottom: 0.25rem; font-size: 1.2rem;">
-            📄 <strong>Your Submitted Poem:</strong>
+            📄 <strong>Your submitted poem/ song:</strong>
             </div>
             """, unsafe_allow_html=True)
         st.markdown("""
@@ -331,14 +334,14 @@ if st.session_state.page == "poem_input":
 
         #st.button("📊 Go to Plot", key="go_to_plot")
 
-        #st.button("📝 Submit a New Poem", key="submit_new_poem")
+        #st.button("📝 Submit a new poem/ song", key="submit_new_poem")
 
         # Button actions
         if st.button("📊 Go to Plot"):
             st.session_state.page = "plot_poem"
             st.rerun()
 
-        if st.button("📝 Submit a New Poem"):
+        if st.button("📝 Submit a new poem/ song"):
             for key in [
                 "confirm_clicked", "poem_latex", "paragraph_df",
                 "poem_emotion_data", "poem_text", "emotion_analysis_failed"
@@ -386,12 +389,14 @@ elif st.session_state.page == "plot_novel":
                 with info_col:
                     st.write(f"📖 {book_title}")
                     st.write(f"✍️ {author_name}")
+                    st.write("💡 We chunked your text input by sentences. **By default, one chunk equals five sentences.**")
                 #with cover_col:
                 #    cover_url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.cover.medium.jpg"
                 #    st.image(cover_url, width=150)
             except Exception:
                 st.write("📖 Unknown Title")
                 st.write("✍️ Unknown Author")
+                st.write("💡 We chunked your text input by sentences. **By default, one chunk equals five sentences.**")
 
 
     # Plot selection menu
@@ -710,8 +715,8 @@ elif st.session_state.page == "plot_novel":
 # Page 4 – Plot poem Output
 #################################################
 elif st.session_state.page == "plot_poem":
-    st.title("📝 Step 2: Explore the emotions in your poem")
-    st.write("Dive into your poem’s emotional landscape. Choose a visualization to see how different feelings ebb and flow through the lines.")
+    st.title("📝 Step 2: Explore the emotions in your poem/ song")
+    st.write("Dive into your poem’s or song's emotional landscape. Choose a visualization to see how different feelings ebb and flow through the lines.")
     st.write("💡 We chunked your text input line by line, using the line breaks from the pasted text. **By default, one chunk equals one line.**")
 
     # 👉 Show sidebar menu only if file_data is present
@@ -748,7 +753,7 @@ elif st.session_state.page == "plot_poem":
                     st.write("📖 Unknown Title")
                     st.write("✍️ Unknown Author")
             else:
-                st.write("📖 Poem or non-Gutenberg text")
+                st.write("📖 Poem/ song or non-Gutenberg text")
 
     else:
         st.error("No data source found. Please go back and enter a URL.")
