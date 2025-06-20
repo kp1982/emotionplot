@@ -339,7 +339,7 @@ if st.session_state.page == "poem_input":
 
                 background-color: var(--background-secondary);
                 color: var(--text-color);
-                border: 1px solid var(--block-border-color);
+                border: 1px solid #2ecc71;
             }
             </style>
         """, unsafe_allow_html=True)
